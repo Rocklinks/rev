@@ -3,6 +3,9 @@ name: Live Tracker
 on:
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
   live:
     runs-on: ubuntu-latest
