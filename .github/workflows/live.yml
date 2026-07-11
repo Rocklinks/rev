@@ -1,0 +1,41 @@
+name: Live Tracker
+
+on:
+  workflow_dispatch:
+
+jobs:
+  live:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install deps
+        run: pip install playwright && playwright install chromium
+
+      - name: Download Obscura
+        run: |
+          curl -LO https://github.com/h4ckf0r0day/obscura/releases/latest/download/obscura-x86_64-linux.tar.gz
+          tar xzf obscura-x86_64-linux.tar.gz && chmod +x obscura
+
+      - name: Start Obscura
+        run: ./obscura serve --port 9222 --stealth &
+
+      - name: Wait for Obscura
+        run: sleep 5
+
+      - name: Run live tracker
+        run: python scraper/live_tracker.py
+
+      - name: Commit
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add scraper/live_data.json || true
+          git diff --staged --quiet || git commit -m "live: $(date -u +%Y-%m-%dT%H:%M)" && git push

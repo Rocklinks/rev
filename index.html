@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Google Reviews Tracker — Tamil Nadu</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:#f0f2f5;color:#1a1a2e;min-height:100vh}
+
+/* Header */
+.header{background:#fff;border-bottom:1px solid #e2e8f0;padding:16px 24px;display:flex;align-items:center;justify-content:space-between;box-shadow:0 1px 3px rgba(0,0,0,.06)}
+.logo{display:flex;align-items:center;gap:10px}
+.logo-icon{width:36px;height:36px;background:linear-gradient(135deg,#667eea,#764ba2);border-radius:8px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:18px}
+.logo-text h1{font-size:17px;font-weight:700;color:#1a1a2e}
+.logo-text p{font-size:12px;color:#64748b;margin-top:1px}
+.header-right{display:flex;align-items:center;gap:12px}
+.updated{font-size:12px;color:#94a3b8}
+
+/* Toolbar */
+.toolbar{background:#fff;border-bottom:1px solid #e2e8f0;padding:12px 24px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.btn{padding:8px 18px;border:none;border-radius:8px;cursor:pointer;font-size:13px;font-weight:600;display:inline-flex;align-items:center;gap:6px;transition:all .15s}
+.btn-red{background:#fee2e2;color:#dc2626}
+.btn-red:hover{background:#dc2626;color:#fff}
+.btn-yellow{background:#fef3c7;color:#d97706}
+.btn-yellow:hover{background:#d97706;color:#fff}
+.btn-outline{background:#fff;color:#475569;border:1px solid #e2e8f0}
+.btn-outline:hover{background:#f8fafc;border-color:#94a3b8}
+.btn-agm{background:#f1f5f9;color:#475569;border:1px solid #e2e8f0;padding:6px 14px}
+.btn-agm:hover{background:#e2e8f0}
+.btn-agm.active{background:#6366f1;color:#fff;border-color:#6366f1}
+.divider{width:1px;height:28px;background:#e2e8f0}
+input[type=date]{background:#f8fafc;border:1px solid #e2e8f0;color:#1a1a2e;padding:7px 12px;border-radius:8px;font-size:13px;cursor:pointer}
+input[type=date]:focus{outline:none;border-color:#6366f1}
+
+/* Stats */
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;padding:16px 24px}
+.stat{background:#fff;border-radius:12px;padding:16px 20px;border:1px solid #e2e8f0;box-shadow:0 1px 3px rgba(0,0,0,.04)}
+.stat-label{font-size:11px;color:#94a3b8;text-transform:uppercase;letter-spacing:.5px;font-weight:600}
+.stat-val{font-size:26px;font-weight:800;margin-top:4px;color:#1a1a2e}
+.stat-val.blue{color:#6366f1}
+.stat-val.green{color:#10b981}
+.stat-val.amber{color:#f59e0b}
+.stat-val.purple{color:#8b5cf6}
+
+/* Main table */
+.main{padding:0 24px 24px}
+.table-card{background:#fff;border-radius:12px;border:1px solid #e2e8f0;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.04)}
+.table-header{padding:14px 20px;border-bottom:1px solid #e2e8f0;display:flex;align-items:center;justify-content:space-between}
+.table-header h2{font-size:14px;font-weight:700;color:#1a1a2e}
+.table-header span{font-size:12px;color:#94a3b8}
+.table-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{padding:10px 16px;text-align:left;background:#f8fafc;color:#64748b;font-weight:600;font-size:11px;text-transform:uppercase;letter-spacing:.5px;border-bottom:1px solid #e2e8f0;white-space:nowrap}
+td{padding:11px 16px;border-bottom:1px solid #f1f5f9;color:#334155}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:#f8fafc}
+.agm-row td{background:#f0f4ff;color:#4f46e5;font-weight:700;font-size:12px;padding:8px 16px}
+.agm-row:hover td{background:#e8edff}
+
+/* Badges */
+.badge{display:inline-flex;align-items:center;padding:3px 10px;border-radius:20px;font-size:12px;font-weight:600}
+.badge-green{background:#dcfce7;color:#16a34a}
+.badge-red{background:#fee2e2;color:#dc2626}
+.badge-blue{background:#dbeafe;color:#2563eb}
+.badge-amber{background:#fef3c7;color:#d97706}
+.badge-purple{background:#ede9fe;color:#7c3aed}
+.badge-gray{background:#f1f5f9;color:#64748b}
+.stars{color:#f59e0b;font-size:12px;letter-spacing:1px}
+
+/* Panel */
+.overlay{display:none;position:fixed;inset:0;background:rgba(15,23,42,.4);z-index:200;backdrop-filter:blur(2px)}
+.overlay.open{display:flex;align-items:flex-start;justify-content:center;padding:40px 16px;overflow-y:auto}
+.panel{background:#fff;border-radius:16px;width:100%;max-width:760px;max-height:82vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.15)}
+.panel-head{padding:20px 24px;border-bottom:1px solid #e2e8f0;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;background:#fff;z-index:1}
+.panel-head h2{font-size:16px;font-weight:700}
+.panel-close{background:#f1f5f9;border:none;width:32px;height:32px;border-radius:8px;cursor:pointer;font-size:16px;color:#64748b;display:flex;align-items:center;justify-content:center}
+.panel-close:hover{background:#e2e8f0;color:#1a1a2e}
+.panel-body{padding:20px 24px}
+
+/* Review card */
+.review-card{background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;padding:14px 16px;margin-bottom:10px}
+.review-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px}
+.reviewer{font-weight:700;font-size:14px;color:#1a1a2e}
+.review-branch{font-size:11px;color:#94a3b8;margin-top:2px}
+.review-meta{text-align:right}
+.review-stars{color:#f59e0b;font-size:13px}
+.review-date{font-size:11px;color:#94a3b8;margin-top:2px}
+.review-text{font-size:13px;color:#475569;line-height:1.55;margin-top:8px}
+.no-data{text-align:center;padding:48px;color:#94a3b8;font-size:14px}
+
+/* Live cards */
+.live-card{background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;padding:12px 16px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center}
+.live-name{font-weight:600;font-size:14px;color:#1a1a2e}
+.live-agm{font-size:11px;color:#94a3b8;margin-top:2px}
+.live-new{font-size:22px;font-weight:800;color:#10b981}
+.live-sub{font-size:11px;color:#94a3b8}
+.agm-section-head{display:flex;align-items:center;justify-content:space-between;padding:10px 0 6px;border-bottom:1px solid #e2e8f0;margin:14px 0 8px}
+.agm-section-head h3{font-size:13px;font-weight:700;color:#4f46e5}
+
+/* Spinner */
+.spin{display:inline-block;width:14px;height:14px;border:2px solid #e2e8f0;border-top-color:#6366f1;border-radius:50%;animation:spin .6s linear infinite;vertical-align:middle}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* Empty */
+.chip{display:inline-block;padding:2px 8px;border-radius:4px;font-size:11px;background:#f1f5f9;color:#94a3b8}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="logo">
+    <div class="logo-icon">⭐</div>
+    <div class="logo-text">
+      <h1>Google Reviews Tracker</h1>
+      <p>36 Branches · Tamil Nadu · 6 AGMs</p>
+    </div>
+  </div>
+  <div class="header-right">
+    <span class="updated" id="updatedAt">—</span>
+  </div>
+</div>
+
+<div class="toolbar">
+  <button class="btn btn-red" id="btnLive" onclick="openLive()">🔴 Live Tracker</button>
+  <button class="btn btn-yellow" onclick="openReviews()">⭐ Yesterday's Reviews</button>
+  <div class="divider"></div>
+  <input type="date" id="datePicker" onchange="onDateChange(this.value)">
+  <div class="divider"></div>
+  <div style="display:flex;gap:6px;flex-wrap:wrap" id="agmBtns"></div>
+</div>
+
+<div class="stats" id="statsRow"></div>
+
+<div class="main">
+  <div class="table-card">
+    <div class="table-header">
+      <h2 id="tableTitle">Branch Summary</h2>
+      <span id="tableSubtitle"></span>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>#</th><th>Branch</th><th>AGM</th>
+            <th>Total Reviews</th><th>Daily New</th>
+            <th>Monthly</th><th>Stars</th><th>Reviews Yesterday</th>
+          </tr>
+        </thead>
+        <tbody id="tbody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- Reviews Panel -->
+<div class="overlay" id="reviewsOverlay" onclick="closePanelOutside(event,'reviewsOverlay')">
+  <div class="panel">
+    <div class="panel-head">
+      <h2>⭐ Yesterday's Individual Reviews</h2>
+      <button class="panel-close" onclick="closePanel('reviewsOverlay')">✕</button>
+    </div>
+    <div class="panel-body" id="reviewsBody"><div class="no-data">Loading...</div></div>
+  </div>
+</div>
+
+<!-- Live Panel -->
+<div class="overlay" id="liveOverlay" onclick="closePanelOutside(event,'liveOverlay')">
+  <div class="panel">
+    <div class="panel-head">
+      <h2>🔴 Live Tracker — New Reviews Since Last Scrape</h2>
+      <button class="panel-close" onclick="closePanel('liveOverlay')">✕</button>
+    </div>
+    <div class="panel-body" id="liveBody"><div class="no-data">Loading...</div></div>
+  </div>
+</div>
+
+<script>
+const BRANCHES=[
+  {id:1,name:"Tuticorin-1",agm:"Sivaperumal"},{id:2,name:"Tuticorin-2",agm:"Sivaperumal"},
+  {id:3,name:"Thiruchendur-1",agm:"Sivaperumal"},{id:4,name:"Thisayanvilai-1",agm:"Sivaperumal"},
+  {id:5,name:"Eral-2",agm:"Sivaperumal"},{id:6,name:"Udankudi",agm:"Sivaperumal"},
+  {id:7,name:"Tirunelveli-1",agm:"Johnson"},{id:8,name:"Valliyur-1",agm:"Johnson"},
+  {id:9,name:"Ambasamudram-1",agm:"Johnson"},{id:10,name:"Anjugramam-1",agm:"Johnson"},
+  {id:11,name:"Nagercoil",agm:"Jeeva"},{id:12,name:"Marthandam",agm:"Jeeva"},
+  {id:13,name:"Thuckalay-1",agm:"Jeeva"},{id:14,name:"Colachel-1",agm:"Jeeva"},
+  {id:15,name:"Kulasekharam-1",agm:"Jeeva"},{id:16,name:"Monday Market",agm:"Jeeva"},
+  {id:17,name:"Karungal-1",agm:"Jeeva"},{id:18,name:"Kovilpatti",agm:"Seenivasan"},
+  {id:19,name:"Ramnad",agm:"Seenivasan"},{id:20,name:"Paramakudi",agm:"Seenivasan"},
+  {id:21,name:"Sayalkudi-1",agm:"Seenivasan"},{id:22,name:"Villathikullam",agm:"Seenivasan"},
+  {id:23,name:"Sattur-2",agm:"Seenivasan"},{id:24,name:"Sankarankovil-1",agm:"Seenivasan"},
+  {id:25,name:"Kayathar-1",agm:"Seenivasan"},{id:26,name:"Thenkasi",agm:"Muthuselvam"},
+  {id:27,name:"Thenkasi-2",agm:"Muthuselvam"},{id:28,name:"Surandai-1",agm:"Muthuselvam"},
+  {id:29,name:"Puliyankudi-1",agm:"Muthuselvam"},{id:30,name:"Sengottai-1",agm:"Muthuselvam"},
+  {id:31,name:"Rajapalayam",agm:"Muthuselvam"},{id:32,name:"Virudhunagar",agm:"Venkadesan"},
+  {id:33,name:"Virudhunagar-2",agm:"Venkadesan"},{id:34,name:"Aruppukottai",agm:"Venkadesan"},
+  {id:35,name:"Aruppukottai-2",agm:"Venkadesan"},{id:36,name:"Sivakasi",agm:"Venkadesan"},
+];
+const AGMS=[...new Set(BRANCHES.map(b=>b.agm))];
+
+let data=null, activeAgm=null, selDate=null;
+
+async function init(){
+  // AGM buttons
+  const wrap=document.getElementById('agmBtns');
+  AGMS.forEach(agm=>{
+    const b=document.createElement('button');
+    b.className='btn btn-agm'; b.textContent=agm; b.dataset.agm=agm;
+    b.onclick=()=>toggleAgm(agm,b);
+    wrap.appendChild(b);
+  });
+
+  // Date picker default = today
+  const today=new Date().toISOString().split('T')[0];
+  document.getElementById('datePicker').value=today;
+  selDate=today;
+
+  try{
+    const r=await fetch('scraper/reviews.json?t='+Date.now());
+    data=await r.json();
+    if(data.last_updated){
+      document.getElementById('updatedAt').textContent=
+        'Last updated: '+new Date(data.last_updated).toLocaleString('en-IN',{timeZone:'Asia/Kolkata'});
+    }
+    // Default to latest available date
+    const dates=Object.keys(data.daily||{}).sort();
+    if(dates.length){selDate=dates[dates.length-1];document.getElementById('datePicker').value=selDate;}
+    render();
+  }catch(e){
+    document.getElementById('tbody').innerHTML=
+      '<tr><td colspan="8" style="text-align:center;padding:48px;color:#94a3b8">No data yet. Run the scraper first.</td></tr>';
+    renderStats(null);
+  }
+}
+
+function toggleAgm(agm,btn){
+  if(activeAgm===agm){activeAgm=null;document.querySelectorAll('.btn-agm').forEach(b=>b.classList.remove('active'));}
+  else{activeAgm=agm;document.querySelectorAll('.btn-agm').forEach(b=>b.classList.remove('active'));btn.classList.add('active');}
+  render();
+}
+
+function onDateChange(v){selDate=v;render();}
+
+function render(){
+  if(!data){return;}
+  const day=data.daily?.[selDate]||{};
+  const branches=data.branches||{};
+  const filtered=BRANCHES.filter(b=>!activeAgm||b.agm===activeAgm);
+
+  document.getElementById('tableTitle').textContent='Branch Summary — '+(selDate||'—');
+  document.getElementById('tableSubtitle').textContent=filtered.length+' branches';
+
+  let html='', lastAgm=null;
+  filtered.forEach(b=>{
+    const bid=String(b.id);
+    const dy=day[bid]||{};
+    const br=branches[bid]||{};
+    if(b.agm!==lastAgm){
+      const agmNew=filtered.filter(x=>x.agm===b.agm).reduce((s,x)=>s+(day[String(x.id)]?.daily_count||0),0);
+      html+=`<tr class="agm-row"><td colspan="8">👤 ${b.agm} &nbsp;·&nbsp; <span style="color:#10b981;font-weight:700">+${agmNew} new today</span></td></tr>`;
+      lastAgm=b.agm;
+    }
+    const total=dy.total_snap||br.overall||0;
+    const daily=dy.daily_count||0;
+    const monthly=dy.monthly||br.monthly||0;
+    const stars=dy.star_rating||br.star_rating||0;
+    const yrev=dy.yesterday_reviews||0;
+    const hasDel=dy.has_deletion;
+    const starsHtml=stars?`<span class="stars">${'★'.repeat(Math.round(stars))}${'☆'.repeat(5-Math.round(stars))}</span> <strong>${stars}</strong>`:'<span class="chip">—</span>';
+    html+=`<tr>
+      <td style="color:#94a3b8;font-size:12px">${b.id}</td>
+      <td><strong>${b.name}</strong></td>
+      <td style="color:#64748b">${b.agm}</td>
+      <td>${total?'<strong>'+total.toLocaleString()+'</strong>':'<span class="chip">—</span>'}</td>
+      <td>${daily>0?`<span class="badge badge-green">+${daily}</span>`:hasDel?`<span class="badge badge-red">${dy.raw_delta}</span>`:'<span class="chip">0</span>'}</td>
+      <td>${monthly?`<span class="badge badge-blue">${monthly}</span>`:'<span class="chip">—</span>'}</td>
+      <td>${starsHtml}</td>
+      <td>${yrev>0?`<span class="badge badge-amber">${yrev} review${yrev>1?'s':''}</span>`:'<span class="chip">—</span>'}</td>
+    </tr>`;
+  });
+  document.getElementById('tbody').innerHTML=html||'<tr><td colspan="8" class="no-data">No data</td></tr>';
+  renderStats(day,branches,filtered);
+}
+
+function renderStats(day,branches,filtered){
+  let total=0,todayNew=0,monthly=0,sSum=0,sCnt=0,ok=0;
+  if(day&&branches&&filtered){
+    filtered.forEach(b=>{
+      const bid=String(b.id);
+      const dy=day[bid]||{};const br=branches[bid]||{};
+      const t=dy.total_snap||br.overall||0;
+      if(t){total+=t;ok++;}
+      todayNew+=dy.daily_count||0;
+      monthly+=dy.monthly||br.monthly||0;
+      const s=dy.star_rating||br.star_rating||0;
+      if(s){sSum+=s;sCnt++;}
+    });
+  }
+  document.getElementById('statsRow').innerHTML=`
+    <div class="stat"><div class="stat-label">Total Reviews</div><div class="stat-val blue">${total?total.toLocaleString():'—'}</div></div>
+    <div class="stat"><div class="stat-label">Today New</div><div class="stat-val green">+${todayNew}</div></div>
+    <div class="stat"><div class="stat-label">This Month</div><div class="stat-val amber">${monthly?monthly.toLocaleString():'—'}</div></div>
+    <div class="stat"><div class="stat-label">Avg Rating</div><div class="stat-val purple">${sCnt?(sSum/sCnt).toFixed(1):'—'}</div></div>
+    <div class="stat"><div class="stat-label">Branches OK</div><div class="stat-val">${ok}/36</div></div>
+  `;
+}
+
+// ── Reviews Panel ─────────────────────────────────────────────────────────────
+async function openReviews(){
+  document.getElementById('reviewsOverlay').classList.add('open');
+  const body=document.getElementById('reviewsBody');
+  body.innerHTML='<div class="no-data"><span class="spin"></span> Loading reviews...</div>';
+  try{
+    const date=selDate||new Date().toISOString().split('T')[0];
+    const yesterday=new Date(new Date(date)-86400000).toISOString().split('T')[0];
+    let reviews=[];
+    for(const d of [date,yesterday]){
+      try{
+        const r=await fetch(`scraper/reviews_detail/${d}.json?t=`+Date.now());
+        if(r.ok){reviews=await r.json();break;}
+      }catch(e){}
+    }
+    if(!reviews.length){
+      body.innerHTML='<div class="no-data">No individual reviews found.<br>Reviews are saved nightly by the scraper.</div>';
+      return;
+    }
+    const byAgm={};
+    reviews.forEach(r=>{const a=r.agm||'Unknown';if(!byAgm[a])byAgm[a]=[];byAgm[a].push(r);});
+    let html=`<p style="color:#94a3b8;font-size:12px;margin-bottom:16px">${reviews.length} reviews found</p>`;
+    const groups=activeAgm?{[activeAgm]:byAgm[activeAgm]||[]}:byAgm;
+    Object.entries(groups).forEach(([agm,revs])=>{
+      if(!revs?.length)return;
+      html+=`<div class="agm-section-head"><h3>👤 ${agm}</h3><span class="badge badge-purple">${revs.length} reviews</span></div>`;
+      revs.forEach(r=>{
+        const stars='★'.repeat(r.stars||0)+'☆'.repeat(5-(r.stars||0));
+        html+=`<div class="review-card">
+          <div class="review-top">
+            <div><div class="reviewer">${r.reviewer||'Anonymous'}</div><div class="review-branch">${r.branch_name||''}</div></div>
+            <div class="review-meta"><div class="review-stars">${stars}</div><div class="review-date">${r.date_text||r.date||''}</div></div>
+          </div>
+          ${r.text?`<div class="review-text">${r.text}</div>`:''}
+        </div>`;
+      });
+    });
+    body.innerHTML=html;
+  }catch(e){body.innerHTML=`<div class="no-data">Error: ${e.message}</div>`;}
+}
+
+// ── Live Panel ────────────────────────────────────────────────────────────────
+async function openLive(){
+  const btn=document.getElementById('btnLive');
+  btn.innerHTML='<span class="spin"></span> Loading...';
+  btn.disabled=true;
+  document.getElementById('liveOverlay').classList.add('open');
+  const body=document.getElementById('liveBody');
+  body.innerHTML='<div class="no-data"><span class="spin"></span> Fetching live data...</div>';
+  try{
+    const r=await fetch('scraper/live_data.json?t='+Date.now());
+    if(!r.ok)throw new Error('Run live_tracker.py first to generate live_data.json');
+    const ld=await r.json();
+    const runTime=new Date(ld.run_time).toLocaleString('en-IN',{timeZone:'Asia/Kolkata'});
+    let html=`<p style="color:#94a3b8;font-size:12px;margin-bottom:16px">Fetched at ${runTime}</p>`;
+    const groups=activeAgm?{[activeAgm]:ld.agm_summary?.[activeAgm]}:ld.agm_summary||{};
+    Object.entries(groups).forEach(([agm,group])=>{
+      if(!group)return;
+      html+=`<div class="agm-section-head"><h3>👤 ${agm}</h3><span class="badge badge-green">+${group.total_new} new</span></div>`;
+      (group.branches||[]).forEach(b=>{
+        html+=`<div class="live-card">
+          <div><div class="live-name">${b.name}</div><div class="live-agm">Total: ${(b.total||0).toLocaleString()} · Base: ${(b.baseline||0).toLocaleString()}</div></div>
+          <div style="text-align:right"><div class="live-new">+${b.live_new||0}</div><div class="live-sub">new since scrape</div></div>
+        </div>`;
+      });
+    });
+    body.innerHTML=html;
+  }catch(e){body.innerHTML=`<div class="no-data">${e.message}</div>`;}
+  btn.innerHTML='🔴 Live Tracker';
+  btn.disabled=false;
+}
+
+function closePanelOutside(e,id){if(e.target===document.getElementById(id))closePanel(id);}
+function closePanel(id){document.getElementById(id).classList.remove('open');}
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){closePanel('reviewsOverlay');closePanel('liveOverlay');}});
+
+init();
+</script>
+</body>
+</html>
