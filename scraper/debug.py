@@ -2,16 +2,17 @@
 """
 Diagnostic tool — dumps aria-labels, buttons, and review text from a Google Maps page.
 NO page.evaluate() — only locators.
+Run via Obscura CDP on localhost:9222.
 """
 import asyncio, re
 from playwright.async_api import async_playwright
 
 async def get_text(loc) -> str:
-    try: return (await loc.text_content(timeout=2000) or "").strip()
+    try: return (await loc.text_content(timeout=3000) or "").strip()
     except Exception: return ""
 
 async def get_attr(loc, attr) -> str:
-    try: return (await loc.get_attribute(attr, timeout=2000) or "").strip()
+    try: return (await loc.get_attribute(attr, timeout=3000) or "").strip()
     except Exception: return ""
 
 async def main():
@@ -20,12 +21,21 @@ async def main():
         ctx = await browser.new_context(
             locale="en-IN", viewport={"width":1366,"height":768},
             extra_http_headers={"Accept-Language":"en-IN,en;q=0.9"},
+            user_agent="Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.7103.25 Safari/537.36",
         )
         page = await ctx.new_page()
+        await page.route("**/*.{png,jpg,jpeg,gif,webp,svg,woff,woff2,ttf,mp4}", lambda r: r.abort())
+
+        # Establish session first
+        try:
+            await page.goto("https://www.google.com/maps", wait_until="load", timeout=15000)
+            await page.wait_for_timeout(1000)
+        except Exception: pass
+
         url = "https://www.google.com/maps/place/?q=place_id:ChIJ5zJNoJfvAzsR-bJE_3bbNYw"
         print(f"Loading: {url}", flush=True)
-        await page.goto(url, wait_until="networkidle", timeout=30000)
-        await page.wait_for_timeout(4000)
+        await page.goto(url, wait_until="load", timeout=30000)
+        await page.wait_for_timeout(5000)
         print(f"Final URL: {page.url}", flush=True)
         print(f"Title: {await page.title()}", flush=True)
 
@@ -34,13 +44,12 @@ async def main():
         locs = page.locator("[aria-label]")
         n = await locs.count()
         print(f"Total elements with aria-label: {n}", flush=True)
-        for i in range(min(n, 60)):
+        for i in range(min(n, 120)):
             try:
                 lbl = await get_attr(locs.nth(i), "aria-label")
                 txt = (await get_text(locs.nth(i)))[:50]
-                tag_name = await locs.nth(i).evaluate("el => el.tagName") if False else "?"
                 if any(x in (lbl or "").lower() for x in ["review","star","rating","rated"]):
-                    print(f"  aria-label={lbl!r} | text={txt!r}", flush=True)
+                    print(f"  [{i}] aria-label={lbl!r} | text={txt!r}", flush=True)
             except Exception:
                 pass
 
