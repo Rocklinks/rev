@@ -1,10 +1,9 @@
 #!/usr/bin/env python3
 """
-Live Tracker — fetches current review counts via Obscura CDP.
-Shows reviews since 12 AM IST today (midnight baseline).
-Saves live_data.json. Run via GitHub Actions workflow_dispatch.
+Live Tracker — scrolls Reviews tab, counts all [data-review-id] blocks
+loaded since 12 AM IST. Scrolls until no new reviews appear (handles 50+).
 """
-import asyncio, traceback, sys, json, re
+import asyncio, traceback, sys, json, re, shutil, glob as globmod
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
@@ -65,8 +64,6 @@ async def get_attr(loc, attr) -> str:
 
 async def extract_review_count(page):
     total = 0
-
-    # Strategy 1: aria-label on elements
     for sel in [
         'button[aria-label*="review" i]',
         'a[aria-label*="review" i]',
@@ -79,7 +76,6 @@ async def extract_review_count(page):
         n = await locs.count()
         for i in range(min(n, 20)):
             lbl = await get_attr(locs.nth(i), "aria-label")
-            # Match "7,213 reviews" but NOT "laptop, mentioned in 91 reviews"
             m = re.search(r"^[\(]?\s*([\d,]+)\s*reviews?\s*[\)]?", lbl, re.I)
             if m:
                 total = int(m.group(1).replace(",",""))
@@ -89,8 +85,6 @@ async def extract_review_count(page):
                 total = int(m.group(1).replace(",",""))
                 if total > 0: break
         if total: break
-
-    # Strategy 2: text content scan
     if not total:
         for sel in ['button', 'a', 'span', 'div']:
             locs = page.locator(sel)
@@ -104,8 +98,6 @@ async def extract_review_count(page):
                         total = candidate
                         break
             if total: break
-
-    # Strategy 3: parse from full page HTML
     if not total:
         try:
             html = await page.content()
@@ -120,12 +112,10 @@ async def extract_review_count(page):
                     total = int(m.group(1).replace(",",""))
                     if total > 0: break
         except Exception: pass
-
     return total
 
 async def extract_stars(page):
     stars = 0.0
-
     for sel in [
         '[aria-label*="Rated" i]',
         '[aria-label*="stars" i]',
@@ -143,7 +133,6 @@ async def extract_stars(page):
                     stars = v
                     break
         if stars: break
-
     if not stars:
         try:
             html = await page.content()
@@ -152,7 +141,6 @@ async def extract_stars(page):
                 v = float(m.group(1))
                 if 1.0 <= v <= 5.0: stars = v
         except Exception: pass
-
     return stars
 
 def parse_relative_date(text, today_ist):
@@ -168,15 +156,48 @@ def parse_relative_date(text, today_ist):
         return (today_ist - timedelta(days=int(m.group(1)))).date().strftime("%Y-%m-%d")
     return None
 
-async def extract_recent_reviews(page, today_str):
-    reviews_found = []
-    seen_ids = set()
+async def count_reviews_by_scroll(page, today_str):
+    """Click Reviews tab, sort newest, scroll and count all reviews from today.
+    Stops when it hits a review older than today (sorted newest first)."""
     today_ist_dt = ist_now()
+    seen_ids = set()
+    today_count = 0
 
-    blocks = page.locator('[data-review-id]')
-    n = await blocks.count()
+    # Click Reviews tab
+    try:
+        tab_sel = (
+            'button[aria-label*="Review" i], '
+            'button:has-text("Reviews"), '
+            'a[aria-label*="Review" i]'
+        )
+        if await page.locator(tab_sel).count() > 0:
+            await page.locator(tab_sel).first.click(timeout=5000)
+            await page.wait_for_timeout(2000)
+    except Exception: pass
 
-    if n > 0:
+    # Sort newest
+    try:
+        sb_sel = 'button[aria-label*="Sort" i], button[aria-label*="sort" i]'
+        if await page.locator(sb_sel).count() > 0:
+            await page.locator(sb_sel).first.click(timeout=5000)
+            await page.wait_for_timeout(800)
+            nw_sel = (
+                '[role="menuitemradio"]:has-text("Newest"), '
+                'li:has-text("Newest"), '
+                '[role="option"]:has-text("Newest")'
+            )
+            if await page.locator(nw_sel).count() > 0:
+                await page.locator(nw_sel).first.click(timeout=5000)
+                await page.wait_for_timeout(2000)
+    except Exception: pass
+
+    # Scroll and count every review from today. Stop when we see one older than today.
+    for scroll_round in range(200):
+        blocks = page.locator('[data-review-id]')
+        n = await blocks.count()
+
+        found_older_than_today = False
+
         for i in range(n):
             try:
                 blk = blocks.nth(i)
@@ -195,52 +216,30 @@ async def extract_recent_reviews(page, today_str):
 
                 parsed = parse_relative_date(dt, today_ist_dt)
                 if parsed is None: continue
-                if parsed < today_str: continue
 
-                rev_stars = 0
-                for ss in ['[role="img"][aria-label*="star" i]',
-                           '[aria-label*="Rated" i]',
-                           '[aria-label*="star" i]']:
-                    try:
-                        if await blk.locator(ss).count() > 0:
-                            lbl = await get_attr(blk.locator(ss).first, "aria-label")
-                            m = re.search(r"([1-5])", lbl)
-                            if m: rev_stars = int(m.group(1)); break
-                    except Exception: pass
-
-                reviewer = "Anonymous"
-                for ns in ['button[jsaction]', '[data-review-id] button:first-of-type',
-                           'a[href*="contrib"]', 'div[role="button"]']:
-                    try:
-                        if await blk.locator(ns).count() > 0:
-                            t = await get_text(blk.locator(ns).first)
-                            if t and len(t) < 50 and not re.search(r"ago|day|week|month|year", t, re.I):
-                                reviewer = t; break
-                    except Exception: pass
-
-                rev_text = ""
-                for ts2 in ['[class*="wiI7pd"]', '[class*="MyEned"]',
-                            'span[class] > span', 'div[class] > span']:
-                    try:
-                        if await blk.locator(ts2).count() > 0:
-                            rev_text = await get_text(blk.locator(ts2).first)
-                            if rev_text and len(rev_text) > 5: break
-                            rev_text = ""
-                    except Exception: pass
-
-                reviews_found.append({
-                    "review_id": rid,
-                    "reviewer": reviewer,
-                    "stars": rev_stars,
-                    "text": rev_text,
-                    "date_text": dt,
-                    "date": parsed,
-                })
+                if parsed == today_str:
+                    today_count += 1
+                elif parsed < today_str:
+                    found_older_than_today = True
+                    break
             except Exception: continue
 
-    return reviews_found
+        if found_older_than_today:
+            break
 
-async def fetch_total(browser, branch, today_str):
+        # Scroll down
+        try:
+            panel_sel = '[tabindex="-1"]'
+            if await page.locator(panel_sel).count() > 0:
+                await page.locator(panel_sel).first.focus()
+            await page.keyboard.press("End")
+        except Exception: pass
+        await page.wait_for_timeout(1000)
+
+    return today_count
+
+async def fetch_branch(browser, branch, today_str):
+    """Fetch total count + today's review count via scroll method."""
     url = f"https://www.google.com/maps/place/?q=place_id:{branch['place_id']}"
     page = None
     try:
@@ -251,7 +250,6 @@ async def fetch_total(browser, branch, today_str):
         )
         page = await ctx.new_page()
         await page.route("**/*.{png,jpg,jpeg,gif,webp,svg,woff,woff2,ttf,mp4}", lambda r: r.abort())
-        # Establish session by loading Google Maps first
         try:
             await page.goto("https://www.google.com/maps", wait_until="load", timeout=15000)
             await page.wait_for_timeout(1000)
@@ -262,56 +260,17 @@ async def fetch_total(browser, branch, today_str):
         total = await extract_review_count(page)
         stars = await extract_stars(page)
 
-        # Also scrape today's individual reviews
-        today_reviews = []
+        today_count = 0
         if total > 0:
-            # Click Reviews tab
-            try:
-                tab_sel = (
-                    'button[aria-label*="Review" i], '
-                    'button:has-text("Reviews"), '
-                    'a[aria-label*="Review" i]'
-                )
-                if await page.locator(tab_sel).count() > 0:
-                    await page.locator(tab_sel).first.click(timeout=5000)
-                    await page.wait_for_timeout(2000)
-            except Exception: pass
-
-            # Sort newest
-            try:
-                sb_sel = 'button[aria-label*="Sort" i], button[aria-label*="sort" i]'
-                if await page.locator(sb_sel).count() > 0:
-                    await page.locator(sb_sel).first.click(timeout=5000)
-                    await page.wait_for_timeout(800)
-                    nw_sel = (
-                        '[role="menuitemradio"]:has-text("Newest"), '
-                        'li:has-text("Newest"), '
-                        '[role="option"]:has-text("Newest")'
-                    )
-                    if await page.locator(nw_sel).count() > 0:
-                        await page.locator(nw_sel).first.click(timeout=5000)
-                        await page.wait_for_timeout(2000)
-            except Exception: pass
-
-            # Scroll to load reviews
-            for _ in range(15):
-                try:
-                    panel_sel = '[tabindex="-1"]'
-                    if await page.locator(panel_sel).count() > 0:
-                        await page.locator(panel_sel).first.focus()
-                    await page.keyboard.press("End")
-                except Exception: pass
-                await page.wait_for_timeout(1000)
-
-            today_reviews = await extract_recent_reviews(page, today_str)
+            today_count = await count_reviews_by_scroll(page, today_str)
 
         await page.close(); await ctx.close()
-        return total, stars, today_reviews
-    except Exception as e:
+        return total, stars, today_count
+    except Exception:
         try:
             if page: await page.close()
         except Exception: pass
-        return 0, 0.0, []
+        return 0, 0.0, 0
 
 async def run_live():
     from playwright.async_api import async_playwright
@@ -319,8 +278,7 @@ async def run_live():
     run_time = now_ist.isoformat()
     today    = now_ist.date().strftime("%Y-%m-%d")
 
-    # Get 12 AM IST baseline (today's midnight snapshot if it exists, else yesterday's final)
-    midnight_ist = now_ist.replace(hour=0, minute=0, second=0, microsecond=0)
+    # Get 12 AM IST baseline
     base = {}
     if DATA_FILE.exists():
         try:
@@ -331,21 +289,13 @@ async def run_live():
         except Exception: pass
 
     results = {}
-    all_live_reviews = []
     async with async_playwright() as p:
-        # Always launch a local browser — Obscura's Chrome/145 can't render Google Maps JS
-        import shutil, glob as globmod
         brave = shutil.which("brave") or shutil.which("brave-browser") or shutil.which("google-chrome") or shutil.which("chromium")
         if not brave:
-            # Try Playwright's installed chromium as fallback
             candidates = globmod.glob(str(Path.home() / ".cache" / "ms-playwright" / "chromium-*" / "chrome-linux" / "chrome"))
-            if not candidates:
-                candidates = globmod.glob(str(Path.home() / ".cache" / "ms-playwright" / "chromium-*" / "chrome-linux" / "chromium"))
-            if candidates:
-                brave = candidates[0]
+            if candidates: brave = candidates[0]
         if not brave:
-            print("FATAL: No browser found. Install brave, google-chrome, or run: playwright install chromium", flush=True)
-            sys.exit(1)
+            print("FATAL: No browser found.", flush=True); sys.exit(1)
         browser = await p.chromium.launch(
             executable_path=brave, headless=True,
             args=["--no-sandbox","--disable-gpu","--disable-dev-shm-usage",
@@ -358,20 +308,18 @@ async def run_live():
             async with sem:
                 bid = str(branch["id"])
                 print(f"  [{branch['id']:02}/36] {branch['name']} ...", flush=True)
-                total, stars, reviews = await fetch_total(browser, branch, today)
+                total, stars, today_count = await fetch_branch(browser, branch, today)
                 if total == 0:
                     await asyncio.sleep(2)
-                    total, stars, reviews = await fetch_total(browser, branch, today)
-                baseline = base.get(bid,{}).get("total_snap",0)
-                live_new = max(total - baseline, 0)
+                    total, stars, today_count = await fetch_branch(browser, branch, today)
+                baseline = base.get(bid,{}).get("total_snap", 0)
                 results[bid] = {
                     "id":branch["id"],"name":branch["name"],"agm":branch["agm"],
-                    "total":total,"stars":stars,"baseline":baseline,"live_new":live_new,
+                    "total":total,"stars":stars,"baseline":baseline,
+                    "today_count":today_count,
                 }
-                for rev in reviews:
-                    all_live_reviews.append({**rev, "branch_id":branch["id"],
-                                            "branch_name":branch["name"], "agm":branch["agm"]})
-                print(f"  {'✓' if total else '✗'} {branch['name']}: total={total} +{live_new} new reviews_today={len(reviews)}", flush=True)
+                status = "✓" if total else "✗"
+                print(f"  {status} {branch['name']}: total={total} today={today_count}", flush=True)
                 await asyncio.sleep(0.3)
 
         await asyncio.gather(*[fetch_one(b) for b in BRANCHES])
@@ -381,26 +329,9 @@ async def run_live():
     for bid, r in results.items():
         agm = r["agm"]
         if agm not in agm_summary:
-            agm_summary[agm] = {"total_new":0,"branches":[],"reviews":[]}
-        agm_summary[agm]["total_new"] += r["live_new"]
+            agm_summary[agm] = {"total_today":0,"branches":[]}
+        agm_summary[agm]["total_today"] += r["today_count"]
         agm_summary[agm]["branches"].append(r)
-
-    for rev in all_live_reviews:
-        agm = rev["agm"]
-        if agm in agm_summary:
-            agm_summary[agm]["reviews"].append(rev)
-
-    live_dir = LIVE_FILE.parent/"live_reviews"
-    live_dir.mkdir(parents=True, exist_ok=True)
-    live_reviews_path = live_dir/f"{today}.json"
-    existing_live = []
-    if live_reviews_path.exists():
-        try: existing_live = json.loads(live_reviews_path.read_text(encoding="utf-8"))
-        except Exception: pass
-    existing_ids = {rv["review_id"] for rv in existing_live}
-    merged_live = existing_live + [rv for rv in all_live_reviews if rv["review_id"] not in existing_ids]
-    live_reviews_path.write_text(json.dumps(merged_live, indent=2, ensure_ascii=False), encoding="utf-8")
-    print(f"  Saved {len(merged_live)} live reviews -> {live_reviews_path}", flush=True)
 
     LIVE_FILE.write_text(json.dumps({
         "run_time":run_time,"today":today,

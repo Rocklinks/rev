@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" type="image/webp" href="https://www.sathya.store/favicon.webp">
 <title>Google Reviews Tracker — Tamil Nadu</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
@@ -434,7 +435,7 @@ async function openLive(){
 
     Object.entries(groups).forEach(([agm,group])=>{
       if(!group)return;
-      html+=`<div class="agm-section-head"><h3>&#128100; ${agm}</h3><span class="badge badge-green">+${group.total_new} new</span></div>`;
+      html+=`<div class="agm-section-head"><h3>&#128100; ${agm}</h3><span class="badge badge-green">+${group.total_today} new</span></div>`;
       (group.branches||[]).forEach(b=>{
         const bid=String(b.id);
         const revs=reviewsByBranch[bid]||[];
@@ -456,7 +457,7 @@ async function openLive(){
         html+=`<div class="live-card" style="flex-direction:column;align-items:stretch">
           <div style="display:flex;justify-content:space-between;align-items:center">
             <div><div class="live-name">${b.name}</div><div class="live-agm">Total: ${(b.total||0).toLocaleString()} &middot; Baseline: ${(b.baseline||0).toLocaleString()}</div></div>
-            <div style="text-align:right"><div class="live-new">+${b.live_new||0}</div><div class="live-sub">new since 12 AM</div></div>
+            <div style="text-align:right"><div class="live-new">+${b.today_count||0}</div><div class="live-sub">new since 12 AM</div></div>
           </div>
           ${revsHtml}
         </div>`;
