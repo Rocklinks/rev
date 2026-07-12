@@ -2,9 +2,9 @@
 """
 Diagnostic tool — dumps aria-labels, buttons, and review text from a Google Maps page.
 NO page.evaluate() — only locators.
-Run via Obscura CDP on localhost:9222.
+Launches Brave/Chromium directly (no Obscura CDP).
 """
-import asyncio, re
+import asyncio, re, shutil
 from playwright.async_api import async_playwright
 
 async def get_text(loc) -> str:
@@ -16,8 +16,16 @@ async def get_attr(loc, attr) -> str:
     except Exception: return ""
 
 async def main():
+    brave = shutil.which("brave") or shutil.which("brave-browser") or shutil.which("google-chrome") or shutil.which("chromium")
+    if not brave:
+        print("FATAL: No browser found."); return
     async with async_playwright() as p:
-        browser = await p.chromium.connect_over_cdp("http://localhost:9222")
+        browser = await p.chromium.launch(
+            executable_path=brave, headless=True,
+            args=["--no-sandbox","--disable-gpu","--disable-dev-shm-usage",
+                   "--disable-blink-features=AutomationControlled"],
+        )
+        print(f"Launched {brave}", flush=True)
         ctx = await browser.new_context(
             locale="en-IN", viewport={"width":1366,"height":768},
             extra_http_headers={"Accept-Language":"en-IN,en;q=0.9"},
@@ -28,18 +36,18 @@ async def main():
 
         # Establish session first
         try:
-            await page.goto("https://www.google.com/maps", wait_until="load", timeout=15000)
-            await page.wait_for_timeout(1000)
+            await page.goto("https://www.google.com/maps", wait_until="load", timeout=20000)
+            await page.wait_for_timeout(3000)
         except Exception: pass
 
         url = "https://www.google.com/maps/place/?q=place_id:ChIJ5zJNoJfvAzsR-bJE_3bbNYw"
         print(f"Loading: {url}", flush=True)
-        await page.goto(url, wait_until="load", timeout=30000)
-        await page.wait_for_timeout(5000)
+        await page.goto(url, wait_until="load", timeout=45000)
+        await page.wait_for_timeout(10000)
         print(f"Final URL: {page.url}", flush=True)
         print(f"Title: {await page.title()}", flush=True)
 
-        # Dump all aria-labels (no evaluate — use locator only)
+        # Dump all aria-labels
         print("\n=== ALL ARIA-LABELS ===", flush=True)
         locs = page.locator("[aria-label]")
         n = await locs.count()
@@ -82,7 +90,7 @@ async def main():
             except Exception:
                 pass
 
-        # Dump page HTML snippet for review section
+        # Dump page HTML snippet
         print("\n=== PAGE HTML SNIPPET (body first 5000 chars) ===", flush=True)
         try:
             html = await page.content()

@@ -201,19 +201,19 @@ async def extract_recent_reviews(page, today_str):
                 for ss in ['[role="img"][aria-label*="star" i]',
                            '[aria-label*="Rated" i]',
                            '[aria-label*="star" i]']:
-                    se = blk.locator(ss).first
-                    if await se.count() > 0:
-                        lbl = await get_attr(se, "aria-label")
-                        m = re.search(r"([1-5])", lbl)
-                        if m: rev_stars = int(m.group(1)); break
+                    try:
+                        if await blk.locator(ss).count() > 0:
+                            lbl = await get_attr(blk.locator(ss).first, "aria-label")
+                            m = re.search(r"([1-5])", lbl)
+                            if m: rev_stars = int(m.group(1)); break
+                    except Exception: pass
 
                 reviewer = "Anonymous"
                 for ns in ['button[jsaction]', '[data-review-id] button:first-of-type',
                            'a[href*="contrib"]', 'div[role="button"]']:
                     try:
-                        ne = blk.locator(ns).first
-                        if await ne.count() > 0:
-                            t = await get_text(ne)
+                        if await blk.locator(ns).count() > 0:
+                            t = await get_text(blk.locator(ns).first)
                             if t and len(t) < 50 and not re.search(r"ago|day|week|month|year", t, re.I):
                                 reviewer = t; break
                     except Exception: pass
@@ -222,9 +222,8 @@ async def extract_recent_reviews(page, today_str):
                 for ts2 in ['[class*="wiI7pd"]', '[class*="MyEned"]',
                             'span[class] > span', 'div[class] > span']:
                     try:
-                        te = blk.locator(ts2).first
-                        if await te.count() > 0:
-                            rev_text = await get_text(te)
+                        if await blk.locator(ts2).count() > 0:
+                            rev_text = await get_text(blk.locator(ts2).first)
                             if rev_text and len(rev_text) > 5: break
                             rev_text = ""
                     except Exception: pass
@@ -268,38 +267,38 @@ async def fetch_total(browser, branch, today_str):
         if total > 0:
             # Click Reviews tab
             try:
-                tab = page.locator(
+                tab_sel = (
                     'button[aria-label*="Review" i], '
                     'button:has-text("Reviews"), '
                     'a[aria-label*="Review" i]'
-                ).first
-                if await tab.count() > 0:
-                    await tab.click(timeout=5000)
+                )
+                if await page.locator(tab_sel).count() > 0:
+                    await page.locator(tab_sel).first.click(timeout=5000)
                     await page.wait_for_timeout(2000)
             except Exception: pass
 
             # Sort newest
             try:
-                sb = page.locator('button[aria-label*="Sort" i], button[aria-label*="sort" i]').first
-                if await sb.count() > 0:
-                    await sb.click(timeout=5000)
+                sb_sel = 'button[aria-label*="Sort" i], button[aria-label*="sort" i]'
+                if await page.locator(sb_sel).count() > 0:
+                    await page.locator(sb_sel).first.click(timeout=5000)
                     await page.wait_for_timeout(800)
-                    nw = page.locator(
+                    nw_sel = (
                         '[role="menuitemradio"]:has-text("Newest"), '
                         'li:has-text("Newest"), '
                         '[role="option"]:has-text("Newest")'
-                    ).first
-                    if await nw.count() > 0:
-                        await nw.click(timeout=5000)
+                    )
+                    if await page.locator(nw_sel).count() > 0:
+                        await page.locator(nw_sel).first.click(timeout=5000)
                         await page.wait_for_timeout(2000)
             except Exception: pass
 
             # Scroll to load reviews
             for _ in range(15):
                 try:
-                    panel = page.locator('[tabindex="-1"]').first
-                    if await panel.count() > 0:
-                        await panel.focus()
+                    panel_sel = '[tabindex="-1"]'
+                    if await page.locator(panel_sel).count() > 0:
+                        await page.locator(panel_sel).first.focus()
                     await page.keyboard.press("End")
                 except Exception: pass
                 await page.wait_for_timeout(1000)
@@ -334,7 +333,25 @@ async def run_live():
     results = {}
     all_live_reviews = []
     async with async_playwright() as p:
-        browser = await p.chromium.connect_over_cdp("http://localhost:9222")
+        # Always launch a local browser — Obscura's Chrome/145 can't render Google Maps JS
+        import shutil, glob as globmod
+        brave = shutil.which("brave") or shutil.which("brave-browser") or shutil.which("google-chrome") or shutil.which("chromium")
+        if not brave:
+            # Try Playwright's installed chromium as fallback
+            candidates = globmod.glob(str(Path.home() / ".cache" / "ms-playwright" / "chromium-*" / "chrome-linux" / "chrome"))
+            if not candidates:
+                candidates = globmod.glob(str(Path.home() / ".cache" / "ms-playwright" / "chromium-*" / "chrome-linux" / "chromium"))
+            if candidates:
+                brave = candidates[0]
+        if not brave:
+            print("FATAL: No browser found. Install brave, google-chrome, or run: playwright install chromium", flush=True)
+            sys.exit(1)
+        browser = await p.chromium.launch(
+            executable_path=brave, headless=True,
+            args=["--no-sandbox","--disable-gpu","--disable-dev-shm-usage",
+                   "--disable-blink-features=AutomationControlled"],
+        )
+        print(f"  Launched {brave}", flush=True)
         sem = asyncio.Semaphore(CONCURRENCY)
 
         async def fetch_one(branch):

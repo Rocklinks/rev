@@ -329,41 +329,41 @@ async def scrape_branch(browser, branch, snap_date, yesterday):
         if total > 0:
             # Click Reviews tab
             try:
-                tab = page.locator(
+                tab_sel = (
                     'button[aria-label*="Review" i], '
                     'button:has-text("Reviews"), '
                     'a[aria-label*="Review" i]'
-                ).first
-                if await tab.count() > 0:
-                    await tab.click(timeout=5000)
+                )
+                if await page.locator(tab_sel).count() > 0:
+                    await page.locator(tab_sel).first.click(timeout=5000)
                     await page.wait_for_timeout(2000)
             except Exception: pass
 
             # Sort newest
             try:
-                sb = page.locator(
+                sb_sel = (
                     'button[aria-label*="Sort" i], '
                     'button[aria-label*="sort" i]'
-                ).first
-                if await sb.count() > 0:
-                    await sb.click(timeout=5000)
+                )
+                if await page.locator(sb_sel).count() > 0:
+                    await page.locator(sb_sel).first.click(timeout=5000)
                     await page.wait_for_timeout(800)
-                    nw = page.locator(
+                    nw_sel = (
                         '[role="menuitemradio"]:has-text("Newest"), '
                         'li:has-text("Newest"), '
                         '[role="option"]:has-text("Newest")'
-                    ).first
-                    if await nw.count() > 0:
-                        await nw.click(timeout=5000)
+                    )
+                    if await page.locator(nw_sel).count() > 0:
+                        await page.locator(nw_sel).first.click(timeout=5000)
                         await page.wait_for_timeout(2000)
             except Exception: pass
 
             # Scroll down to load more reviews
             for _ in range(30):
                 try:
-                    panel = page.locator('[tabindex="-1"]').first
-                    if await panel.count() > 0:
-                        await panel.focus()
+                    panel_sel = '[tabindex="-1"]'
+                    if await page.locator(panel_sel).count() > 0:
+                        await page.locator(panel_sel).first.focus()
                     await page.keyboard.press("End")
                 except Exception: pass
                 await page.wait_for_timeout(1000)
@@ -384,7 +384,31 @@ async def run_all(snap_date, yesterday):
     from playwright.async_api import async_playwright
     results = {}; success = 0; failed = []
     async with async_playwright() as p:
-        browser = await p.chromium.connect_over_cdp("http://localhost:9222")
+        # Always launch a local browser — Obscura's Chrome/145 can't render Google Maps JS
+        brave = shutil.which("brave") or shutil.which("brave-browser") or shutil.which("google-chrome") or shutil.which("chromium")
+        if not brave:
+            # Try Playwright's installed chromium as fallback
+            import subprocess
+            try:
+                result = subprocess.run(["playwright", "install", "--dry-run", "chromium"],
+                                       capture_output=True, text=True, timeout=5)
+            except Exception: pass
+            # Playwright stores chromium in ~/.cache/ms-playwright/
+            import glob as globmod
+            candidates = globmod.glob(str(Path.home() / ".cache" / "ms-playwright" / "chromium-*" / "chrome-linux" / "chrome"))
+            if not candidates:
+                candidates = globmod.glob(str(Path.home() / ".cache" / "ms-playwright" / "chromium-*" / "chrome-linux" / "chromium"))
+            if candidates:
+                brave = candidates[0]
+        if not brave:
+            print("FATAL: No browser found. Install brave, google-chrome, or run: playwright install chromium", flush=True)
+            sys.exit(1)
+        browser = await p.chromium.launch(
+            executable_path=brave, headless=True,
+            args=["--no-sandbox","--disable-gpu","--disable-dev-shm-usage",
+                   "--disable-blink-features=AutomationControlled"],
+        )
+        print(f"  Launched {brave}", flush=True)
         sem = asyncio.Semaphore(CONCURRENCY)
         async def scrape_one(branch):
             nonlocal success
