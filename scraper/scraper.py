@@ -10,7 +10,6 @@ from pathlib import Path
 
 IST        = timedelta(hours=5, minutes=30)
 DATA_FILE  = Path(__file__).parent / "reviews.json"
-BACKUP_DIR = Path(__file__).parent / "backups"
 CONCURRENCY = 3
 
 BRANCHES = [
@@ -59,10 +58,6 @@ def load_data():
     return {"branches":{}, "daily":{}, "logs":[]}
 
 def save_data(data):
-    BACKUP_DIR.mkdir(parents=True, exist_ok=True)
-    if DATA_FILE.exists():
-        ts = datetime.now().strftime("%Y%m%d_%H%M%S")
-        shutil.copy2(DATA_FILE, BACKUP_DIR/f"reviews_{ts}.json")
     DATA_FILE.write_text(json.dumps(data, indent=2, ensure_ascii=False), encoding="utf-8")
 
 def ist_now():
