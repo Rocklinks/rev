@@ -1,15 +1,16 @@
 #!/usr/bin/env python3
 """
 Live Tracker — fetches current review counts via Obscura CDP.
+Shows reviews since 12 AM IST today (midnight baseline).
 Saves live_data.json. Run via GitHub Actions workflow_dispatch.
 """
-import asyncio, traceback, sys, json, re, shutil
+import asyncio, traceback, sys, json, re
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
-IST       = timedelta(hours=5, minutes=30)
-DATA_FILE = Path(__file__).parent / "reviews.json"
-LIVE_FILE = Path(__file__).parent / "live_data.json"
+IST        = timedelta(hours=5, minutes=30)
+DATA_FILE  = Path(__file__).parent / "reviews.json"
+LIVE_FILE  = Path(__file__).parent / "live_data.json"
 CONCURRENCY = 3
 
 BRANCHES = [
@@ -62,62 +63,256 @@ async def get_attr(loc, attr) -> str:
     try: return (await loc.get_attribute(attr, timeout=3000) or "").strip()
     except Exception: return ""
 
-async def fetch_total(browser, branch):
-    url = (
-        f"https://www.google.com/maps/search/?api=1"
-        f"&query={branch['name'].replace(' ','+')}"
-        f"&query_place_id={branch['place_id']}"
-    )
+async def extract_review_count(page):
+    total = 0
+
+    # Strategy 1: aria-label on elements
+    for sel in [
+        'button[aria-label*="review" i]',
+        'a[aria-label*="review" i]',
+        'span[aria-label*="review" i]',
+        'div[aria-label*="review" i]',
+        '[aria-label*="reviews on Google" i]',
+        '[aria-label*="Review" i]',
+    ]:
+        locs = page.locator(sel)
+        n = await locs.count()
+        for i in range(min(n, 20)):
+            lbl = await get_attr(locs.nth(i), "aria-label")
+            # Match "7,213 reviews" but NOT "laptop, mentioned in 91 reviews"
+            m = re.search(r"^[\(]?\s*([\d,]+)\s*reviews?\s*[\)]?", lbl, re.I)
+            if m:
+                total = int(m.group(1).replace(",",""))
+                if total > 0: break
+            m = re.search(r"([\d,]+)\s*reviews?\s*on Google", lbl, re.I)
+            if m:
+                total = int(m.group(1).replace(",",""))
+                if total > 0: break
+        if total: break
+
+    # Strategy 2: text content scan
+    if not total:
+        for sel in ['button', 'a', 'span', 'div']:
+            locs = page.locator(sel)
+            n = await locs.count()
+            for i in range(min(n, 200)):
+                txt = await get_text(locs.nth(i))
+                m = re.search(r"[\(]?\s*([\d,]+)\s*reviews?\s*[\)]?", txt, re.I)
+                if m:
+                    candidate = int(m.group(1).replace(",",""))
+                    if candidate > 0:
+                        total = candidate
+                        break
+            if total: break
+
+    # Strategy 3: parse from full page HTML
+    if not total:
+        try:
+            html = await page.content()
+            for pat in [
+                r'"([\d,]+)\s*reviews?"',
+                r'([\d,]+)\s*reviews?\s*on Google',
+                r'aria-label="[^"]*([\d,]+)\s*review',
+                r'>([\d,]+)\s*reviews?<',
+            ]:
+                m = re.search(pat, html, re.I)
+                if m:
+                    total = int(m.group(1).replace(",",""))
+                    if total > 0: break
+        except Exception: pass
+
+    return total
+
+async def extract_stars(page):
+    stars = 0.0
+
+    for sel in [
+        '[aria-label*="Rated" i]',
+        '[aria-label*="stars" i]',
+        '[aria-label*="star" i]',
+        '[aria-label*="rating" i]',
+    ]:
+        locs = page.locator(sel)
+        n = await locs.count()
+        for i in range(min(n, 10)):
+            lbl = await get_attr(locs.nth(i), "aria-label")
+            m = re.search(r"([1-5][.,]\d)", lbl)
+            if m:
+                v = float(m.group(1).replace(",","."))
+                if 1.0 <= v <= 5.0:
+                    stars = v
+                    break
+        if stars: break
+
+    if not stars:
+        try:
+            html = await page.content()
+            m = re.search(r'"rating"[^}]*"([\d.]+)"', html)
+            if m:
+                v = float(m.group(1))
+                if 1.0 <= v <= 5.0: stars = v
+        except Exception: pass
+
+    return stars
+
+def parse_relative_date(text, today_ist):
+    t = text.lower().strip()
+    today     = today_ist.date()
+    yesterday = (today_ist - timedelta(days=1)).date()
+    if any(x in t for x in ["just now","second","minute","hour"]):
+        return today.strftime("%Y-%m-%d")
+    if any(x in t for x in ["yesterday","1 day ago","a day ago"]):
+        return yesterday.strftime("%Y-%m-%d")
+    m = re.search(r"(\d+)\s*day", t)
+    if m:
+        return (today_ist - timedelta(days=int(m.group(1)))).date().strftime("%Y-%m-%d")
+    return None
+
+async def extract_recent_reviews(page, today_str):
+    reviews_found = []
+    seen_ids = set()
+    today_ist_dt = ist_now()
+
+    blocks = page.locator('[data-review-id]')
+    n = await blocks.count()
+
+    if n > 0:
+        for i in range(n):
+            try:
+                blk = blocks.nth(i)
+                rid = await get_attr(blk, "data-review-id")
+                if not rid or rid in seen_ids: continue
+                seen_ids.add(rid)
+
+                dt = ""
+                spans = blk.locator("span")
+                sc = await spans.count()
+                for j in range(min(sc, 30)):
+                    t = await get_text(spans.nth(j))
+                    if re.search(r"ago|yesterday|day|week|month|year|edited", t, re.I) and len(t) < 40:
+                        dt = t; break
+                if not dt: continue
+
+                parsed = parse_relative_date(dt, today_ist_dt)
+                if parsed is None: continue
+                if parsed < today_str: continue
+
+                rev_stars = 0
+                for ss in ['[role="img"][aria-label*="star" i]',
+                           '[aria-label*="Rated" i]',
+                           '[aria-label*="star" i]']:
+                    se = blk.locator(ss).first
+                    if await se.count() > 0:
+                        lbl = await get_attr(se, "aria-label")
+                        m = re.search(r"([1-5])", lbl)
+                        if m: rev_stars = int(m.group(1)); break
+
+                reviewer = "Anonymous"
+                for ns in ['button[jsaction]', '[data-review-id] button:first-of-type',
+                           'a[href*="contrib"]', 'div[role="button"]']:
+                    try:
+                        ne = blk.locator(ns).first
+                        if await ne.count() > 0:
+                            t = await get_text(ne)
+                            if t and len(t) < 50 and not re.search(r"ago|day|week|month|year", t, re.I):
+                                reviewer = t; break
+                    except Exception: pass
+
+                rev_text = ""
+                for ts2 in ['[class*="wiI7pd"]', '[class*="MyEned"]',
+                            'span[class] > span', 'div[class] > span']:
+                    try:
+                        te = blk.locator(ts2).first
+                        if await te.count() > 0:
+                            rev_text = await get_text(te)
+                            if rev_text and len(rev_text) > 5: break
+                            rev_text = ""
+                    except Exception: pass
+
+                reviews_found.append({
+                    "review_id": rid,
+                    "reviewer": reviewer,
+                    "stars": rev_stars,
+                    "text": rev_text,
+                    "date_text": dt,
+                    "date": parsed,
+                })
+            except Exception: continue
+
+    return reviews_found
+
+async def fetch_total(browser, branch, today_str):
+    url = f"https://www.google.com/maps/place/?q=place_id:{branch['place_id']}"
     page = None
     try:
         ctx = await browser.new_context(
             locale="en-IN", viewport={"width":1366,"height":768},
             extra_http_headers={"Accept-Language":"en-IN,en;q=0.9"},
+            user_agent="Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.7103.25 Safari/537.36",
         )
         page = await ctx.new_page()
         await page.route("**/*.{png,jpg,jpeg,gif,webp,svg,woff,woff2,ttf,mp4}", lambda r: r.abort())
-        await page.goto(url, wait_until="networkidle", timeout=30000)
-        await page.wait_for_timeout(2500)
+        # Establish session by loading Google Maps first
+        try:
+            await page.goto("https://www.google.com/maps", wait_until="load", timeout=15000)
+            await page.wait_for_timeout(1000)
+        except Exception: pass
+        await page.goto(url, wait_until="load", timeout=30000)
+        await page.wait_for_timeout(5000)
 
-        total = 0
-        for sel in ['[aria-label*="review" i]','[aria-label*="Review"]']:
-            locs = page.locator(sel)
-            n = await locs.count()
-            for i in range(min(n,15)):
-                lbl = await get_attr(locs.nth(i), "aria-label")
-                m = re.search(r"([\d,]+)\s*review", lbl, re.I)
-                if m: total = int(m.group(1).replace(",","")); break
-            if total: break
+        total = await extract_review_count(page)
+        stars = await extract_stars(page)
 
-        if not total:
-            for sel in ['button','span','div']:
-                locs = page.locator(sel)
-                n = await locs.count()
-                for i in range(min(n,100)):
-                    txt = await get_text(locs.nth(i))
-                    m = re.search(r"^([\d,]+)\s*reviews?$", txt, re.I)
-                    if m: total = int(m.group(1).replace(",","")); break
-                if total: break
+        # Also scrape today's individual reviews
+        today_reviews = []
+        if total > 0:
+            # Click Reviews tab
+            try:
+                tab = page.locator(
+                    'button[aria-label*="Review" i], '
+                    'button:has-text("Reviews"), '
+                    'a[aria-label*="Review" i]'
+                ).first
+                if await tab.count() > 0:
+                    await tab.click(timeout=5000)
+                    await page.wait_for_timeout(2000)
+            except Exception: pass
 
-        stars = 0.0
-        for sel in ['[aria-label*="Rated" i]','[aria-label*="star" i]']:
-            locs = page.locator(sel)
-            n = await locs.count()
-            for i in range(min(n,10)):
-                lbl = await get_attr(locs.nth(i), "aria-label")
-                m = re.search(r"([1-5][.,]\d)", lbl)
-                if m:
-                    v = float(m.group(1).replace(",","."))
-                    if 1.0 <= v <= 5.0: stars = v; break
-            if stars: break
+            # Sort newest
+            try:
+                sb = page.locator('button[aria-label*="Sort" i], button[aria-label*="sort" i]').first
+                if await sb.count() > 0:
+                    await sb.click(timeout=5000)
+                    await page.wait_for_timeout(800)
+                    nw = page.locator(
+                        '[role="menuitemradio"]:has-text("Newest"), '
+                        'li:has-text("Newest"), '
+                        '[role="option"]:has-text("Newest")'
+                    ).first
+                    if await nw.count() > 0:
+                        await nw.click(timeout=5000)
+                        await page.wait_for_timeout(2000)
+            except Exception: pass
+
+            # Scroll to load reviews
+            for _ in range(15):
+                try:
+                    panel = page.locator('[tabindex="-1"]').first
+                    if await panel.count() > 0:
+                        await panel.focus()
+                    await page.keyboard.press("End")
+                except Exception: pass
+                await page.wait_for_timeout(1000)
+
+            today_reviews = await extract_recent_reviews(page, today_str)
 
         await page.close(); await ctx.close()
-        return total, stars
+        return total, stars, today_reviews
     except Exception as e:
         try:
             if page: await page.close()
         except Exception: pass
-        return 0, 0.0
+        return 0, 0.0, []
 
 async def run_live():
     from playwright.async_api import async_playwright
@@ -125,15 +320,19 @@ async def run_live():
     run_time = now_ist.isoformat()
     today    = now_ist.date().strftime("%Y-%m-%d")
 
+    # Get 12 AM IST baseline (today's midnight snapshot if it exists, else yesterday's final)
+    midnight_ist = now_ist.replace(hour=0, minute=0, second=0, microsecond=0)
     base = {}
     if DATA_FILE.exists():
         try:
             d = json.loads(DATA_FILE.read_text(encoding="utf-8"))
             dates = sorted([x for x in d.get("daily",{}) if x <= today], reverse=True)
-            base = d["daily"].get(dates[0],{}) if dates else {}
+            if dates:
+                base = d["daily"].get(dates[0],{})
         except Exception: pass
 
     results = {}
+    all_live_reviews = []
     async with async_playwright() as p:
         browser = await p.chromium.connect_over_cdp("http://localhost:9222")
         sem = asyncio.Semaphore(CONCURRENCY)
@@ -142,17 +341,20 @@ async def run_live():
             async with sem:
                 bid = str(branch["id"])
                 print(f"  [{branch['id']:02}/36] {branch['name']} ...", flush=True)
-                total, stars = await fetch_total(browser, branch)
+                total, stars, reviews = await fetch_total(browser, branch, today)
                 if total == 0:
                     await asyncio.sleep(2)
-                    total, stars = await fetch_total(browser, branch)
+                    total, stars, reviews = await fetch_total(browser, branch, today)
                 baseline = base.get(bid,{}).get("total_snap",0)
                 live_new = max(total - baseline, 0)
                 results[bid] = {
                     "id":branch["id"],"name":branch["name"],"agm":branch["agm"],
                     "total":total,"stars":stars,"baseline":baseline,"live_new":live_new,
                 }
-                print(f"  {'✓' if total else '✗'} {branch['name']}: total={total} +{live_new} new", flush=True)
+                for rev in reviews:
+                    all_live_reviews.append({**rev, "branch_id":branch["id"],
+                                            "branch_name":branch["name"], "agm":branch["agm"]})
+                print(f"  {'✓' if total else '✗'} {branch['name']}: total={total} +{live_new} new reviews_today={len(reviews)}", flush=True)
                 await asyncio.sleep(0.3)
 
         await asyncio.gather(*[fetch_one(b) for b in BRANCHES])
@@ -162,9 +364,26 @@ async def run_live():
     for bid, r in results.items():
         agm = r["agm"]
         if agm not in agm_summary:
-            agm_summary[agm] = {"total_new":0,"branches":[]}
+            agm_summary[agm] = {"total_new":0,"branches":[],"reviews":[]}
         agm_summary[agm]["total_new"] += r["live_new"]
         agm_summary[agm]["branches"].append(r)
+
+    for rev in all_live_reviews:
+        agm = rev["agm"]
+        if agm in agm_summary:
+            agm_summary[agm]["reviews"].append(rev)
+
+    live_dir = LIVE_FILE.parent/"live_reviews"
+    live_dir.mkdir(parents=True, exist_ok=True)
+    live_reviews_path = live_dir/f"{today}.json"
+    existing_live = []
+    if live_reviews_path.exists():
+        try: existing_live = json.loads(live_reviews_path.read_text(encoding="utf-8"))
+        except Exception: pass
+    existing_ids = {rv["review_id"] for rv in existing_live}
+    merged_live = existing_live + [rv for rv in all_live_reviews if rv["review_id"] not in existing_ids]
+    live_reviews_path.write_text(json.dumps(merged_live, indent=2, ensure_ascii=False), encoding="utf-8")
+    print(f"  Saved {len(merged_live)} live reviews -> {live_reviews_path}", flush=True)
 
     LIVE_FILE.write_text(json.dumps({
         "run_time":run_time,"today":today,

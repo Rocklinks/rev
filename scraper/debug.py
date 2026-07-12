@@ -1,9 +1,18 @@
 #!/usr/bin/env python3
-"""Add to workflow between 'Wait for Obscura' and 'Run scraper':
-  - run: python scraper/debug.py
+"""
+Diagnostic tool — dumps aria-labels, buttons, and review text from a Google Maps page.
+NO page.evaluate() — only locators.
 """
 import asyncio, re
 from playwright.async_api import async_playwright
+
+async def get_text(loc) -> str:
+    try: return (await loc.text_content(timeout=2000) or "").strip()
+    except Exception: return ""
+
+async def get_attr(loc, attr) -> str:
+    try: return (await loc.get_attribute(attr, timeout=2000) or "").strip()
+    except Exception: return ""
 
 async def main():
     async with async_playwright() as p:
@@ -13,25 +22,25 @@ async def main():
             extra_http_headers={"Accept-Language":"en-IN,en;q=0.9"},
         )
         page = await ctx.new_page()
-        url = "https://www.google.com/maps/search/?api=1&query=Tuticorin-1&query_place_id=ChIJ5zJNoJfvAzsR-bJE_3bbNYw"
+        url = "https://www.google.com/maps/place/?q=place_id:ChIJ5zJNoJfvAzsR-bJE_3bbNYw"
         print(f"Loading: {url}", flush=True)
         await page.goto(url, wait_until="networkidle", timeout=30000)
         await page.wait_for_timeout(4000)
         print(f"Final URL: {page.url}", flush=True)
         print(f"Title: {await page.title()}", flush=True)
 
-        # Dump all aria-labels
+        # Dump all aria-labels (no evaluate — use locator only)
         print("\n=== ALL ARIA-LABELS ===", flush=True)
         locs = page.locator("[aria-label]")
         n = await locs.count()
         print(f"Total elements with aria-label: {n}", flush=True)
-        for i in range(min(n, 40)):
+        for i in range(min(n, 60)):
             try:
-                lbl = await locs.nth(i).get_attribute("aria-label", timeout=2000)
-                txt = (await locs.nth(i).text_content(timeout=2000) or "").strip()[:50]
-                tag = await locs.nth(i).evaluate("el => el.tagName")
+                lbl = await get_attr(locs.nth(i), "aria-label")
+                txt = (await get_text(locs.nth(i)))[:50]
+                tag_name = await locs.nth(i).evaluate("el => el.tagName") if False else "?"
                 if any(x in (lbl or "").lower() for x in ["review","star","rating","rated"]):
-                    print(f"  {tag} | aria-label={lbl!r} | text={txt!r}", flush=True)
+                    print(f"  aria-label={lbl!r} | text={txt!r}", flush=True)
             except Exception:
                 pass
 
@@ -40,30 +49,40 @@ async def main():
         btns = page.locator("button")
         nb = await btns.count()
         print(f"Total buttons: {nb}", flush=True)
-        for i in range(min(nb, 30)):
+        for i in range(min(nb, 40)):
             try:
-                txt = (await btns.nth(i).text_content(timeout=2000) or "").strip()[:60]
-                lbl = await btns.nth(i).get_attribute("aria-label", timeout=2000) or ""
+                txt = (await get_text(btns.nth(i)))[:80]
+                lbl = await get_attr(btns.nth(i), "aria-label")
                 if txt or lbl:
                     print(f"  text={txt!r} aria={lbl!r}", flush=True)
             except Exception:
                 pass
 
-        # Sample of all text on page
-        print("\n=== PAGE TEXT SAMPLE ===", flush=True)
+        # Review text scan
+        print("\n=== REVIEW TEXT SAMPLE ===", flush=True)
         all_spans = page.locator("span, div")
         ns = await all_spans.count()
         shown = 0
-        for i in range(min(ns, 500)):
+        for i in range(min(ns, 1000)):
             try:
-                txt = (await all_spans.nth(i).text_content(timeout=1000) or "").strip()
-                if re.search(r"\d.*review", txt, re.I) and len(txt) < 50:
+                txt = (await get_text(all_spans.nth(i)))
+                if re.search(r"\d.*review", txt, re.I) and len(txt) < 80:
                     print(f"  REVIEW TEXT: {txt!r}", flush=True)
                     shown += 1
-                    if shown > 10: break
+                    if shown > 20: break
             except Exception:
                 pass
 
+        # Dump page HTML snippet for review section
+        print("\n=== PAGE HTML SNIPPET (body first 5000 chars) ===", flush=True)
+        try:
+            html = await page.content()
+            print(html[:5000], flush=True)
+        except Exception as e:
+            print(f"  Error getting content: {e}", flush=True)
+
+        await page.close()
+        await ctx.close()
         await browser.close()
 
 asyncio.run(main())

@@ -24,6 +24,8 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#f0f2f5;color:#1a1a2
 .btn-red:hover{background:#dc2626;color:#fff}
 .btn-yellow{background:#fef3c7;color:#d97706}
 .btn-yellow:hover{background:#d97706;color:#fff}
+.btn-green{background:#dcfce7;color:#16a34a}
+.btn-green:hover{background:#16a34a;color:#fff}
 .btn-outline{background:#fff;color:#475569;border:1px solid #e2e8f0}
 .btn-outline:hover{background:#f8fafc;border-color:#94a3b8}
 .btn-agm{background:#f1f5f9;color:#475569;border:1px solid #e2e8f0;padding:6px 14px}
@@ -110,20 +112,21 @@ tr:hover td{background:#f8fafc}
 
 <div class="header">
   <div class="logo">
-    <div class="logo-icon">⭐</div>
+    <div class="logo-icon">&#11088;</div>
     <div class="logo-text">
       <h1>Google Reviews Tracker</h1>
-      <p>36 Branches · Tamil Nadu · 6 AGMs</p>
+      <p>36 Branches &middot; Tamil Nadu &middot; 6 AGMs</p>
     </div>
   </div>
   <div class="header-right">
-    <span class="updated" id="updatedAt">—</span>
+    <span class="updated" id="updatedAt">&mdash;</span>
   </div>
 </div>
 
 <div class="toolbar">
-  <button class="btn btn-red" id="btnLive" onclick="openLive()">🔴 Live Tracker</button>
-  <button class="btn btn-yellow" onclick="openReviews()">⭐ Yesterday's Reviews</button>
+  <button class="btn btn-red" id="btnLive" onclick="openLive()">&#128308; Live Tracker</button>
+  <button class="btn btn-green" onclick="openTodayReviews()">&#11088; Today's Reviews</button>
+  <button class="btn btn-yellow" onclick="openReviews()">&#11088; Yesterday's Reviews</button>
   <div class="divider"></div>
   <input type="date" id="datePicker" onchange="onDateChange(this.value)">
   <div class="divider"></div>
@@ -153,14 +156,25 @@ tr:hover td{background:#f8fafc}
   </div>
 </div>
 
-<!-- Reviews Panel -->
+<!-- Reviews Panel (Yesterday) -->
 <div class="overlay" id="reviewsOverlay" onclick="closePanelOutside(event,'reviewsOverlay')">
   <div class="panel">
     <div class="panel-head">
-      <h2>⭐ Yesterday's Individual Reviews</h2>
-      <button class="panel-close" onclick="closePanel('reviewsOverlay')">✕</button>
+      <h2>&#11088; Yesterday's Individual Reviews</h2>
+      <button class="panel-close" onclick="closePanel('reviewsOverlay')">&#10005;</button>
     </div>
     <div class="panel-body" id="reviewsBody"><div class="no-data">Loading...</div></div>
+  </div>
+</div>
+
+<!-- Today's Reviews Panel -->
+<div class="overlay" id="todayOverlay" onclick="closePanelOutside(event,'todayOverlay')">
+  <div class="panel">
+    <div class="panel-head">
+      <h2>&#11088; Today's Individual Reviews (since midnight)</h2>
+      <button class="panel-close" onclick="closePanel('todayOverlay')">&#10005;</button>
+    </div>
+    <div class="panel-body" id="todayBody"><div class="no-data">Loading...</div></div>
   </div>
 </div>
 
@@ -168,8 +182,8 @@ tr:hover td{background:#f8fafc}
 <div class="overlay" id="liveOverlay" onclick="closePanelOutside(event,'liveOverlay')">
   <div class="panel">
     <div class="panel-head">
-      <h2>🔴 Live Tracker — New Reviews Since Last Scrape</h2>
-      <button class="panel-close" onclick="closePanel('liveOverlay')">✕</button>
+      <h2>&#128308; Live Tracker &mdash; New Reviews Since 12 AM</h2>
+      <button class="panel-close" onclick="closePanel('liveOverlay')">&#10005;</button>
     </div>
     <div class="panel-body" id="liveBody"><div class="no-data">Loading...</div></div>
   </div>
@@ -201,7 +215,6 @@ const AGMS=[...new Set(BRANCHES.map(b=>b.agm))];
 let data=null, activeAgm=null, selDate=null;
 
 async function init(){
-  // AGM buttons
   const wrap=document.getElementById('agmBtns');
   AGMS.forEach(agm=>{
     const b=document.createElement('button');
@@ -210,7 +223,6 @@ async function init(){
     wrap.appendChild(b);
   });
 
-  // Date picker default = today
   const today=new Date().toISOString().split('T')[0];
   document.getElementById('datePicker').value=today;
   selDate=today;
@@ -222,7 +234,6 @@ async function init(){
       document.getElementById('updatedAt').textContent=
         'Last updated: '+new Date(data.last_updated).toLocaleString('en-IN',{timeZone:'Asia/Kolkata'});
     }
-    // Default to latest available date
     const dates=Object.keys(data.daily||{}).sort();
     if(dates.length){selDate=dates[dates.length-1];document.getElementById('datePicker').value=selDate;}
     render();
@@ -247,7 +258,7 @@ function render(){
   const branches=data.branches||{};
   const filtered=BRANCHES.filter(b=>!activeAgm||b.agm===activeAgm);
 
-  document.getElementById('tableTitle').textContent='Branch Summary — '+(selDate||'—');
+  document.getElementById('tableTitle').textContent='Branch Summary \u2014 '+(selDate||'\u2014');
   document.getElementById('tableSubtitle').textContent=filtered.length+' branches';
 
   let html='', lastAgm=null;
@@ -257,7 +268,7 @@ function render(){
     const br=branches[bid]||{};
     if(b.agm!==lastAgm){
       const agmNew=filtered.filter(x=>x.agm===b.agm).reduce((s,x)=>s+(day[String(x.id)]?.daily_count||0),0);
-      html+=`<tr class="agm-row"><td colspan="8">👤 ${b.agm} &nbsp;·&nbsp; <span style="color:#10b981;font-weight:700">+${agmNew} new today</span></td></tr>`;
+      html+=`<tr class="agm-row"><td colspan="8">&#128100; ${b.agm} &nbsp;&middot;&nbsp; <span style="color:#10b981;font-weight:700">+${agmNew} new today</span></td></tr>`;
       lastAgm=b.agm;
     }
     const total=dy.total_snap||br.overall||0;
@@ -266,16 +277,16 @@ function render(){
     const stars=dy.star_rating||br.star_rating||0;
     const yrev=dy.yesterday_reviews||0;
     const hasDel=dy.has_deletion;
-    const starsHtml=stars?`<span class="stars">${'★'.repeat(Math.round(stars))}${'☆'.repeat(5-Math.round(stars))}</span> <strong>${stars}</strong>`:'<span class="chip">—</span>';
+    const starsHtml=stars?`<span class="stars">${'\u2605'.repeat(Math.round(stars))}${'\u2606'.repeat(5-Math.round(stars))}</span> <strong>${stars}</strong>`:'<span class="chip">&mdash;</span>';
     html+=`<tr>
       <td style="color:#94a3b8;font-size:12px">${b.id}</td>
       <td><strong>${b.name}</strong></td>
       <td style="color:#64748b">${b.agm}</td>
-      <td>${total?'<strong>'+total.toLocaleString()+'</strong>':'<span class="chip">—</span>'}</td>
+      <td>${total?'<strong>'+total.toLocaleString()+'</strong>':'<span class="chip">&mdash;</span>'}</td>
       <td>${daily>0?`<span class="badge badge-green">+${daily}</span>`:hasDel?`<span class="badge badge-red">${dy.raw_delta}</span>`:'<span class="chip">0</span>'}</td>
-      <td>${monthly?`<span class="badge badge-blue">${monthly}</span>`:'<span class="chip">—</span>'}</td>
+      <td>${monthly?`<span class="badge badge-blue">${monthly}</span>`:'<span class="chip">&mdash;</span>'}</td>
       <td>${starsHtml}</td>
-      <td>${yrev>0?`<span class="badge badge-amber">${yrev} review${yrev>1?'s':''}</span>`:'<span class="chip">—</span>'}</td>
+      <td>${yrev>0?`<span class="badge badge-amber">${yrev} review${yrev>1?'s':''}</span>`:'<span class="chip">&mdash;</span>'}</td>
     </tr>`;
   });
   document.getElementById('tbody').innerHTML=html||'<tr><td colspan="8" class="no-data">No data</td></tr>';
@@ -297,15 +308,15 @@ function renderStats(day,branches,filtered){
     });
   }
   document.getElementById('statsRow').innerHTML=`
-    <div class="stat"><div class="stat-label">Total Reviews</div><div class="stat-val blue">${total?total.toLocaleString():'—'}</div></div>
+    <div class="stat"><div class="stat-label">Total Reviews</div><div class="stat-val blue">${total?total.toLocaleString():'&mdash;'}</div></div>
     <div class="stat"><div class="stat-label">Today New</div><div class="stat-val green">+${todayNew}</div></div>
-    <div class="stat"><div class="stat-label">This Month</div><div class="stat-val amber">${monthly?monthly.toLocaleString():'—'}</div></div>
-    <div class="stat"><div class="stat-label">Avg Rating</div><div class="stat-val purple">${sCnt?(sSum/sCnt).toFixed(1):'—'}</div></div>
+    <div class="stat"><div class="stat-label">This Month</div><div class="stat-val amber">${monthly?monthly.toLocaleString():'&mdash;'}</div></div>
+    <div class="stat"><div class="stat-label">Avg Rating</div><div class="stat-val purple">${sCnt?(sSum/sCnt).toFixed(1):'&mdash;'}</div></div>
     <div class="stat"><div class="stat-label">Branches OK</div><div class="stat-val">${ok}/36</div></div>
   `;
 }
 
-// ── Reviews Panel ─────────────────────────────────────────────────────────────
+// ── Yesterday's Reviews Panel ────────────────────────────────────────────────
 async function openReviews(){
   document.getElementById('reviewsOverlay').classList.add('open');
   const body=document.getElementById('reviewsBody');
@@ -314,7 +325,7 @@ async function openReviews(){
     const date=selDate||new Date().toISOString().split('T')[0];
     const yesterday=new Date(new Date(date)-86400000).toISOString().split('T')[0];
     let reviews=[];
-    for(const d of [date,yesterday]){
+    for(const d of [yesterday,date]){
       try{
         const r=await fetch(`scraper/reviews_detail/${d}.json?t=`+Date.now());
         if(r.ok){reviews=await r.json();break;}
@@ -330,9 +341,9 @@ async function openReviews(){
     const groups=activeAgm?{[activeAgm]:byAgm[activeAgm]||[]}:byAgm;
     Object.entries(groups).forEach(([agm,revs])=>{
       if(!revs?.length)return;
-      html+=`<div class="agm-section-head"><h3>👤 ${agm}</h3><span class="badge badge-purple">${revs.length} reviews</span></div>`;
+      html+=`<div class="agm-section-head"><h3>&#128100; ${agm}</h3><span class="badge badge-purple">${revs.length} reviews</span></div>`;
       revs.forEach(r=>{
-        const stars='★'.repeat(r.stars||0)+'☆'.repeat(5-(r.stars||0));
+        const stars='\u2605'.repeat(r.stars||0)+'\u2606'.repeat(5-(r.stars||0));
         html+=`<div class="review-card">
           <div class="review-top">
             <div><div class="reviewer">${r.reviewer||'Anonymous'}</div><div class="review-branch">${r.branch_name||''}</div></div>
@@ -346,7 +357,51 @@ async function openReviews(){
   }catch(e){body.innerHTML=`<div class="no-data">Error: ${e.message}</div>`;}
 }
 
-// ── Live Panel ────────────────────────────────────────────────────────────────
+// ── Today's Reviews Panel ────────────────────────────────────────────────────
+async function openTodayReviews(){
+  document.getElementById('todayOverlay').classList.add('open');
+  const body=document.getElementById('todayBody');
+  body.innerHTML='<div class="no-data"><span class="spin"></span> Loading today\'s reviews...</div>';
+  try{
+    const today=new Date().toISOString().split('T')[0];
+    let reviews=[];
+    // Try live_reviews first (from live tracker), then reviews_detail (from nightly scraper)
+    for(const path of [`scraper/live_reviews/${today}.json`,`scraper/reviews_detail/${today}.json`]){
+      try{
+        const r=await fetch(`${path}?t=`+Date.now());
+        if(r.ok){
+          const data=await r.json();
+          if(Array.isArray(data)&&data.length>0){reviews=data;break;}
+        }
+      }catch(e){}
+    }
+    if(!reviews.length){
+      body.innerHTML='<div class="no-data">No individual reviews found for today yet.<br>Reviews appear after the scraper or live tracker runs.</div>';
+      return;
+    }
+    const byAgm={};
+    reviews.forEach(r=>{const a=r.agm||'Unknown';if(!byAgm[a])byAgm[a]=[];byAgm[a].push(r);});
+    let html=`<p style="color:#94a3b8;font-size:12px;margin-bottom:16px">${reviews.length} reviews found today</p>`;
+    const groups=activeAgm?{[activeAgm]:byAgm[activeAgm]||[]}:byAgm;
+    Object.entries(groups).forEach(([agm,revs])=>{
+      if(!revs?.length)return;
+      html+=`<div class="agm-section-head"><h3>&#128100; ${agm}</h3><span class="badge badge-green">${revs.length} reviews</span></div>`;
+      revs.forEach(r=>{
+        const stars='\u2605'.repeat(r.stars||0)+'\u2606'.repeat(5-(r.stars||0));
+        html+=`<div class="review-card">
+          <div class="review-top">
+            <div><div class="reviewer">${r.reviewer||'Anonymous'}</div><div class="review-branch">${r.branch_name||''}</div></div>
+            <div class="review-meta"><div class="review-stars">${stars}</div><div class="review-date">${r.date_text||r.date||''}</div></div>
+          </div>
+          ${r.text?`<div class="review-text">${r.text}</div>`:''}
+        </div>`;
+      });
+    });
+    body.innerHTML=html;
+  }catch(e){body.innerHTML=`<div class="no-data">Error: ${e.message}</div>`;}
+}
+
+// ── Live Panel ───────────────────────────────────────────────────────────────
 async function openLive(){
   const btn=document.getElementById('btnLive');
   btn.innerHTML='<span class="spin"></span> Loading...';
@@ -361,25 +416,64 @@ async function openLive(){
     const runTime=new Date(ld.run_time).toLocaleString('en-IN',{timeZone:'Asia/Kolkata'});
     let html=`<p style="color:#94a3b8;font-size:12px;margin-bottom:16px">Fetched at ${runTime}</p>`;
     const groups=activeAgm?{[activeAgm]:ld.agm_summary?.[activeAgm]}:ld.agm_summary||{};
+
+    // Also try to load live reviews
+    let liveReviews=[];
+    const today=ld.today||new Date().toISOString().split('T')[0];
+    try{
+      const lr=await fetch(`scraper/live_reviews/${today}.json?t=`+Date.now());
+      if(lr.ok)liveReviews=await lr.json();
+    }catch(e){}
+
+    const reviewsByBranch={};
+    liveReviews.forEach(r=>{
+      const bid=String(r.branch_id);
+      if(!reviewsByBranch[bid])reviewsByBranch[bid]=[];
+      reviewsByBranch[bid].push(r);
+    });
+
     Object.entries(groups).forEach(([agm,group])=>{
       if(!group)return;
-      html+=`<div class="agm-section-head"><h3>👤 ${agm}</h3><span class="badge badge-green">+${group.total_new} new</span></div>`;
+      html+=`<div class="agm-section-head"><h3>&#128100; ${agm}</h3><span class="badge badge-green">+${group.total_new} new</span></div>`;
       (group.branches||[]).forEach(b=>{
-        html+=`<div class="live-card">
-          <div><div class="live-name">${b.name}</div><div class="live-agm">Total: ${(b.total||0).toLocaleString()} · Base: ${(b.baseline||0).toLocaleString()}</div></div>
-          <div style="text-align:right"><div class="live-new">+${b.live_new||0}</div><div class="live-sub">new since scrape</div></div>
+        const bid=String(b.id);
+        const revs=reviewsByBranch[bid]||[];
+        let revsHtml='';
+        if(revs.length){
+          revsHtml='<div style="margin-top:8px">';
+          revs.forEach(r=>{
+            const stars='\u2605'.repeat(r.stars||0)+'\u2606'.repeat(5-(r.stars||0));
+            revsHtml+=`<div class="review-card" style="margin:4px 0;padding:8px 12px">
+              <div class="review-top">
+                <div><div class="reviewer" style="font-size:12px">${r.reviewer||'Anonymous'}</div></div>
+                <div class="review-meta"><div class="review-stars" style="font-size:11px">${stars}</div><div class="review-date">${r.date_text||''}</div></div>
+              </div>
+              ${r.text?`<div class="review-text" style="font-size:12px">${r.text}</div>`:''}
+            </div>`;
+          });
+          revsHtml+='</div>';
+        }
+        html+=`<div class="live-card" style="flex-direction:column;align-items:stretch">
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <div><div class="live-name">${b.name}</div><div class="live-agm">Total: ${(b.total||0).toLocaleString()} &middot; Baseline: ${(b.baseline||0).toLocaleString()}</div></div>
+            <div style="text-align:right"><div class="live-new">+${b.live_new||0}</div><div class="live-sub">new since 12 AM</div></div>
+          </div>
+          ${revsHtml}
         </div>`;
       });
     });
+    if(!html.includes('agm-section-head')){
+      html+='<div class="no-data">No AGM data found in live_data.json</div>';
+    }
     body.innerHTML=html;
   }catch(e){body.innerHTML=`<div class="no-data">${e.message}</div>`;}
-  btn.innerHTML='🔴 Live Tracker';
+  btn.innerHTML='&#128308; Live Tracker';
   btn.disabled=false;
 }
 
 function closePanelOutside(e,id){if(e.target===document.getElementById(id))closePanel(id);}
 function closePanel(id){document.getElementById(id).classList.remove('open');}
-document.addEventListener('keydown',e=>{if(e.key==='Escape'){closePanel('reviewsOverlay');closePanel('liveOverlay');}});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){closePanel('reviewsOverlay');closePanel('todayOverlay');closePanel('liveOverlay');}});
 
 init();
 </script>

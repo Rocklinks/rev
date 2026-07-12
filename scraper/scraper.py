@@ -2,7 +2,7 @@
 """
 Google Reviews Scraper — Obscura CDP + Playwright locators only.
 NO page.evaluate() — Obscura Chrome/145 returns proper values via locators.
-Runs 1:30 AM IST. Scrapes total, stars, yesterday's individual reviews.
+Runs at 12 AM IST daily. Scrapes total, stars, yesterday's individual reviews.
 """
 import asyncio, traceback, sys, json, re, shutil
 from datetime import datetime, timedelta, timezone
@@ -89,76 +89,251 @@ async def get_attr(loc, attr) -> str:
     try: return (await loc.get_attribute(attr, timeout=3000) or "").strip()
     except Exception: return ""
 
+async def extract_review_count(page):
+    total = 0
+
+    # Strategy 1: aria-label on clickable elements (buttons, links, spans)
+    for sel in [
+        'button[aria-label*="review" i]',
+        'a[aria-label*="review" i]',
+        'span[aria-label*="review" i]',
+        'div[aria-label*="review" i]',
+        '[aria-label*="reviews on Google" i]',
+        '[aria-label*="Review" i]',
+    ]:
+        locs = page.locator(sel)
+        n = await locs.count()
+        for i in range(min(n, 20)):
+            lbl = await get_attr(locs.nth(i), "aria-label")
+            # Match "7,213 reviews" but NOT "laptop, mentioned in 91 reviews"
+            # Prefer exact patterns: "X reviews", "X reviews on Google"
+            m = re.search(r"^[\(]?\s*([\d,]+)\s*reviews?\s*[\)]?", lbl, re.I)
+            if m:
+                total = int(m.group(1).replace(",",""))
+                if total > 0: break
+            m = re.search(r"([\d,]+)\s*reviews?\s*on Google", lbl, re.I)
+            if m:
+                total = int(m.group(1).replace(",",""))
+                if total > 0: break
+        if total: break
+
+    # Strategy 2: text content scan — look for "X reviews" in buttons, links, spans
+    if not total:
+        for sel in ['button', 'a', 'span', 'div']:
+            locs = page.locator(sel)
+            n = await locs.count()
+            for i in range(min(n, 200)):
+                txt = await get_text(locs.nth(i))
+                # Match "1,234 reviews" or "(1,234 reviews)" or "1234 reviews"
+                m = re.search(r"[\(]?\s*([\d,]+)\s*reviews?\s*[\)]?", txt, re.I)
+                if m:
+                    candidate = int(m.group(1).replace(",",""))
+                    if candidate > 0:
+                        total = candidate
+                        break
+            if total: break
+
+    # Strategy 3: parse from full page HTML
+    if not total:
+        try:
+            html = await page.content()
+            # Common patterns in Google Maps HTML
+            for pat in [
+                r'"([\d,]+)\s*reviews?"',
+                r'([\d,]+)\s*reviews?\s*on Google',
+                r'aria-label="[^"]*([\d,]+)\s*review',
+                r'>([\d,]+)\s*reviews?<',
+            ]:
+                m = re.search(pat, html, re.I)
+                if m:
+                    total = int(m.group(1).replace(",",""))
+                    if total > 0: break
+        except Exception: pass
+
+    return total
+
+async def extract_stars(page):
+    stars = 0.0
+
+    # Strategy 1: aria-label containing star rating
+    for sel in [
+        '[aria-label*="Rated" i]',
+        '[aria-label*="stars" i]',
+        '[aria-label*="star" i]',
+        '[aria-label*="rating" i]',
+    ]:
+        locs = page.locator(sel)
+        n = await locs.count()
+        for i in range(min(n, 10)):
+            lbl = await get_attr(locs.nth(i), "aria-label")
+            m = re.search(r"([1-5][.,]\d)", lbl)
+            if m:
+                v = float(m.group(1).replace(",","."))
+                if 1.0 <= v <= 5.0:
+                    stars = v
+                    break
+        if stars: break
+
+    # Strategy 2: parse from page HTML
+    if not stars:
+        try:
+            html = await page.content()
+            m = re.search(r'"rating"[^}]*"([\d.]+)"', html)
+            if m:
+                v = float(m.group(1))
+                if 1.0 <= v <= 5.0: stars = v
+            if not stars:
+                m = re.search(r'aria-label="[^"]*([1-5]\.\d)\s*out\s*of', html, re.I)
+                if m:
+                    v = float(m.group(1))
+                    if 1.0 <= v <= 5.0: stars = v
+        except Exception: pass
+
+    return stars
+
+async def extract_review_cards(page, snap_date, yesterday):
+    reviews_found = []
+    seen_ids = set()
+    today_ist_dt = ist_now()
+
+    # Try data-review-id blocks first
+    blocks = page.locator('[data-review-id]')
+    n = await blocks.count()
+
+    if n > 0:
+        for i in range(n):
+            try:
+                blk = blocks.nth(i)
+                rid = await get_attr(blk, "data-review-id")
+                if not rid or rid in seen_ids: continue
+                seen_ids.add(rid)
+
+                # Date
+                dt = ""
+                spans = blk.locator("span")
+                sc = await spans.count()
+                for j in range(min(sc, 30)):
+                    t = await get_text(spans.nth(j))
+                    if re.search(r"ago|yesterday|day|week|month|year|edited", t, re.I) and len(t) < 40:
+                        dt = t; break
+                if not dt: continue
+
+                parsed = parse_relative_date(dt, today_ist_dt)
+                if parsed is None: continue
+                if parsed < yesterday: continue
+
+                # Stars from individual review
+                rev_stars = 0
+                for ss in ['[role="img"][aria-label*="star" i]',
+                           '[aria-label*="Rated" i]',
+                           '[aria-label*="star" i]']:
+                    se = blk.locator(ss).first
+                    if await se.count() > 0:
+                        lbl = await get_attr(se, "aria-label")
+                        m = re.search(r"([1-5])", lbl)
+                        if m: rev_stars = int(m.group(1)); break
+
+                # Reviewer name — try multiple strategies
+                reviewer = "Anonymous"
+                for ns in [
+                    'button[jsaction]',
+                    '[data-review-id] button:first-of-type',
+                    'a[href*="contrib"]',
+                    'div[role="button"]',
+                ]:
+                    try:
+                        ne = blk.locator(ns).first
+                        if await ne.count() > 0:
+                            t = await get_text(ne)
+                            if t and len(t) < 50 and not re.search(r"ago|day|week|month|year", t, re.I):
+                                reviewer = t; break
+                    except Exception: pass
+
+                # Review text — try multiple strategies
+                rev_text = ""
+                for ts2 in [
+                    '[class*="wiI7pd"]',
+                    '[class*="MyEned"]',
+                    'span[class] > span',
+                    'div[class] > span',
+                ]:
+                    try:
+                        te = blk.locator(ts2).first
+                        if await te.count() > 0:
+                            rev_text = await get_text(te)
+                            if rev_text and len(rev_text) > 5: break
+                            rev_text = ""
+                    except Exception: pass
+
+                if parsed in (yesterday, snap_date):
+                    reviews_found.append({
+                        "review_id": rid,
+                        "reviewer":  reviewer,
+                        "stars":     rev_stars,
+                        "text":      rev_text,
+                        "date_text": dt,
+                        "date":      parsed,
+                    })
+            except Exception: continue
+
+    # Fallback: parse reviews from full page HTML if no data-review-id found
+    if not reviews_found:
+        try:
+            html = await page.content()
+            # Look for review JSON data embedded in the page
+            review_blocks = re.findall(
+                r'\["((?:[^"\\]|\\.){10,200})",\s*\[.*?\],\s*"([^"]*?(?:ago|yesterday|day|week|month|year)[^"]*?)"',
+                html, re.I
+            )
+            for idx, (review_text, date_text) in enumerate(review_blocks):
+                parsed = parse_relative_date(date_text, today_ist_dt)
+                if parsed and parsed >= yesterday:
+                    reviews_found.append({
+                        "review_id": f"html_{idx}",
+                        "reviewer": "Anonymous",
+                        "stars": 0,
+                        "text": review_text[:500],
+                        "date_text": date_text,
+                        "date": parsed,
+                    })
+        except Exception: pass
+
+    return reviews_found
+
 async def scrape_branch(browser, branch, snap_date, yesterday):
-    url = (
-        f"https://www.google.com/maps/search/?api=1"
-        f"&query={branch['name'].replace(' ','+')}"
-        f"&query_place_id={branch['place_id']}"
-    )
+    url = f"https://www.google.com/maps/place/?q=place_id:{branch['place_id']}"
     result = {"total":0, "stars":0.0, "reviews":[], "error":None}
     page = None
     try:
         ctx = await browser.new_context(
             locale="en-IN", viewport={"width":1366,"height":768},
             extra_http_headers={"Accept-Language":"en-IN,en;q=0.9"},
+            user_agent="Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.7103.25 Safari/537.36",
         )
         page = await ctx.new_page()
         await page.route("**/*.{png,jpg,jpeg,gif,webp,svg,woff,woff2,ttf,mp4}", lambda r: r.abort())
-        await page.goto(url, wait_until="networkidle", timeout=30000)
-        await page.wait_for_timeout(3000)
+        # Establish session by loading Google Maps first
+        try:
+            await page.goto("https://www.google.com/maps", wait_until="load", timeout=15000)
+            await page.wait_for_timeout(1000)
+        except Exception: pass
+        await page.goto(url, wait_until="load", timeout=30000)
+        await page.wait_for_timeout(5000)
 
-        # ── Total reviews ─────────────────────────────────────────────────────
-        total = 0
-        # Try aria-label attrs first — most reliable
-        for sel in ['[aria-label*="review" i]', '[aria-label*="Review"]']:
-            locs = page.locator(sel)
-            n = await locs.count()
-            for i in range(min(n, 15)):
-                lbl = await get_attr(locs.nth(i), "aria-label")
-                m = re.search(r"([\d,]+)\s*review", lbl, re.I)
-                if m:
-                    total = int(m.group(1).replace(",",""))
-                    break
-            if total: break
-
-        # Fallback: text content scan
-        if not total:
-            for sel in ['button', 'span', 'div']:
-                locs = page.locator(sel)
-                n = await locs.count()
-                for i in range(min(n, 100)):
-                    txt = await get_text(locs.nth(i))
-                    m = re.search(r"^([\d,]+)\s*reviews?$", txt, re.I)
-                    if m:
-                        total = int(m.group(1).replace(",",""))
-                        break
-                if total: break
-
+        total = await extract_review_count(page)
         result["total"] = total
 
-        # ── Stars ─────────────────────────────────────────────────────────────
-        stars = 0.0
-        for sel in ['[aria-label*="Rated" i]','[aria-label*="star" i]','[aria-label*="rating" i]']:
-            locs = page.locator(sel)
-            n = await locs.count()
-            for i in range(min(n, 10)):
-                lbl = await get_attr(locs.nth(i), "aria-label")
-                m = re.search(r"([1-5][.,]\d)", lbl)
-                if m:
-                    v = float(m.group(1).replace(",","."))
-                    if 1.0 <= v <= 5.0:
-                        stars = v
-                        break
-            if stars: break
+        stars = await extract_stars(page)
         result["stars"] = stars
 
-        # ── Reviews ───────────────────────────────────────────────────────────
         if total > 0:
-            today_ist_dt = ist_now()
-
             # Click Reviews tab
             try:
-                tab = page.locator('button[aria-label*="Review" i], button:has-text("Reviews")').first
+                tab = page.locator(
+                    'button[aria-label*="Review" i], '
+                    'button:has-text("Reviews"), '
+                    'a[aria-label*="Review" i]'
+                ).first
                 if await tab.count() > 0:
                     await tab.click(timeout=5000)
                     await page.wait_for_timeout(2000)
@@ -166,99 +341,35 @@ async def scrape_branch(browser, branch, snap_date, yesterday):
 
             # Sort newest
             try:
-                sb = page.locator('button[aria-label*="Sort" i]').first
+                sb = page.locator(
+                    'button[aria-label*="Sort" i], '
+                    'button[aria-label*="sort" i]'
+                ).first
                 if await sb.count() > 0:
                     await sb.click(timeout=5000)
                     await page.wait_for_timeout(800)
-                    nw = page.locator('[role="menuitemradio"]:has-text("Newest"), li:has-text("Newest")').first
+                    nw = page.locator(
+                        '[role="menuitemradio"]:has-text("Newest"), '
+                        'li:has-text("Newest"), '
+                        '[role="option"]:has-text("Newest")'
+                    ).first
                     if await nw.count() > 0:
                         await nw.click(timeout=5000)
                         await page.wait_for_timeout(2000)
             except Exception: pass
 
-            reviews_found = []
-            seen_ids = set()
-            stop = False
-
-            for _ in range(60):
-                if stop: break
-                blocks = page.locator('[data-review-id]')
-                n = await blocks.count()
-
-                for i in range(n):
-                    try:
-                        blk = blocks.nth(i)
-                        rid = await get_attr(blk, "data-review-id")
-                        if not rid or rid in seen_ids: continue
-                        seen_ids.add(rid)
-
-                        # Date
-                        dt = ""
-                        spans = blk.locator("span")
-                        sc = await spans.count()
-                        for j in range(min(sc, 20)):
-                            t = await get_text(spans.nth(j))
-                            if re.search(r"ago|yesterday|day|week|month|year", t, re.I) and len(t) < 30:
-                                dt = t; break
-                        if not dt: continue
-
-                        parsed = parse_relative_date(dt, today_ist_dt)
-                        if parsed is None: stop = True; break
-                        if parsed < yesterday: stop = True; break
-
-                        # Stars
-                        rev_stars = 0
-                        try:
-                            se = blk.locator('[role="img"][aria-label]').first
-                            if await se.count() > 0:
-                                lbl = await get_attr(se, "aria-label")
-                                m = re.search(r"([1-5])", lbl)
-                                if m: rev_stars = int(m.group(1))
-                        except Exception: pass
-
-                        # Name
-                        reviewer = "Anonymous"
-                        for ns in ['button[jsaction]','div[class*="d4r55"]','a[href*="contrib"]']:
-                            try:
-                                ne = blk.locator(ns).first
-                                if await ne.count() > 0:
-                                    t = await get_text(ne)
-                                    if t: reviewer = t; break
-                            except Exception: pass
-
-                        # Text
-                        rev_text = ""
-                        for ts2 in ['[class*="wiI7pd"]','[class*="MyEned"] span']:
-                            try:
-                                te = blk.locator(ts2).first
-                                if await te.count() > 0:
-                                    rev_text = await get_text(te)
-                                    if rev_text: break
-                            except Exception: pass
-
-                        if parsed in (yesterday, snap_date):
-                            reviews_found.append({
-                                "review_id": rid,
-                                "reviewer":  reviewer,
-                                "stars":     rev_stars,
-                                "text":      rev_text,
-                                "date_text": dt,
-                                "date":      parsed,
-                            })
-                    except Exception: continue
-
-                if stop: break
-
-                # Scroll via keyboard — no JS eval
+            # Scroll down to load more reviews
+            for _ in range(30):
                 try:
                     panel = page.locator('[tabindex="-1"]').first
                     if await panel.count() > 0:
                         await panel.focus()
                     await page.keyboard.press("End")
                 except Exception: pass
-                await page.wait_for_timeout(1300)
+                await page.wait_for_timeout(1000)
 
-            result["reviews"] = reviews_found
+            reviews = await extract_review_cards(page, snap_date, yesterday)
+            result["reviews"] = reviews
 
         await page.close()
         await ctx.close()
@@ -336,6 +447,20 @@ def save_results(results, success, failed, snap_date, yesterday, run_time):
     merged = existing + [rv for rv in all_reviews if rv["review_id"] not in existing_ids]
     detail_path.write_text(json.dumps(merged, indent=2, ensure_ascii=False), encoding="utf-8")
     print(f"  Saved {len(merged)} reviews -> {detail_path}", flush=True)
+
+    # Also save today's reviews (snap_date)
+    today_path = detail_dir/f"{snap_date}.json"
+    today_reviews = [rv for rv in all_reviews if rv.get("date") == snap_date]
+    if today_reviews:
+        existing_today = []
+        if today_path.exists():
+            try: existing_today = json.loads(today_path.read_text(encoding="utf-8"))
+            except Exception: pass
+        existing_today_ids = {rv["review_id"] for rv in existing_today}
+        merged_today = existing_today + [rv for rv in today_reviews if rv["review_id"] not in existing_today_ids]
+        today_path.write_text(json.dumps(merged_today, indent=2, ensure_ascii=False), encoding="utf-8")
+        print(f"  Saved {len(merged_today)} today reviews -> {today_path}", flush=True)
+
     data.setdefault("logs",[]).insert(0,{
         "ran_at":run_time,"snap_date":snap_date,"yesterday":yesterday,
         "baseline_date":baseline_date,"success":success,

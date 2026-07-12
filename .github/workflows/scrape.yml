@@ -2,7 +2,7 @@ name: Google Reviews Scraper
 
 on:
   schedule:
-    - cron: '0 20 * * *'
+    - cron: '30 18 * * *'
   workflow_dispatch:
 
 permissions:
@@ -45,5 +45,5 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add scraper/reviews.json scraper/reviews_detail/ scraper/backups/ || true
+          git add scraper/reviews.json scraper/reviews_detail/ scraper/backups/ scraper/live_data.json scraper/live_reviews/ || true
           git diff --staged --quiet || git commit -m "reviews: $(date -u +%Y-%m-%d)" && git push
