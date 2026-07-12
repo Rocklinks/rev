@@ -213,7 +213,7 @@ tbody td{padding:11px 14px;white-space:nowrap}
   </div>
   <div class="topbar-right">
     <button class="btn btn-red" onclick="openLive()">&#128308; Live</button>
-    <button class="btn btn-green" onclick="openTodayReviews()">&#11088; Today</button>
+    <button class="btn btn-green" onclick="openReviews()">&#128269; Reviews</button>
     <button class="btn btn-export" onclick="openModal()">&#x2B07; Export</button>
     <span id="clock"></span>
   </div>
@@ -251,14 +251,14 @@ tbody td{padding:11px 14px;white-space:nowrap}
   </div>
 </div>
 
-<!-- Today's Reviews Panel -->
-<div class="overlay" id="todayOverlay" onclick="if(event.target===this)closePanel('todayOverlay')">
+<!-- Reviews Panel -->
+<div class="overlay" id="reviewsOverlay" onclick="if(event.target===this)closePanel('reviewsOverlay')">
   <div class="panel">
     <div class="panel-head">
-      <h2>&#11088; Today's Individual Reviews</h2>
-      <button class="panel-close" onclick="closePanel('todayOverlay')">&#10005;</button>
+      <h2>&#128269; Reviews</h2>
+      <button class="panel-close" onclick="closePanel('reviewsOverlay')">&#10005;</button>
     </div>
-    <div class="panel-body" id="todayBody"><div class="no-data">Loading...</div></div>
+    <div class="panel-body" id="reviewsBody"><div class="no-data">Loading...</div></div>
   </div>
 </div>
 
@@ -600,31 +600,96 @@ async function openLive(){
   }catch(e){body.innerHTML=`<div class="no-data">${e.message}</div>`;}
 }
 
-async function openTodayReviews(){
-  document.getElementById("todayOverlay").classList.add("open");
-  const body=document.getElementById("todayBody");
-  body.innerHTML='<div class="no-data"><span class="spin"></span> Loading...</div>';
+// ── REVIEWS PANEL ────────────────────────────────────────────
+let rvAll=[], rvFDate="__all__", rvFBranch="__all__", rvFAgm="__all__", rvFRating=0;
+
+async function openReviews(){
+  document.getElementById("reviewsOverlay").classList.add("open");
+  const body=document.getElementById("reviewsBody");
+  body.innerHTML='<div class="no-data"><span class="spin"></span> Loading reviews...</div>';
   try{
-    const today=new Date().toISOString().split("T")[0];
-    let reviews=[];
-    for(const path of [`scraper/live_reviews/${today}.json`,`scraper/reviews_detail/${today}.json`]){
-      try{const r=await fetch(path+"?t="+Date.now());if(r.ok){const d=await r.json();if(Array.isArray(d)&&d.length){reviews=d;break;}}}catch(e){}
+    const dates=Object.keys(D?.daily||{}).sort();
+    const bMap={};BRANCHES.forEach(b=>{bMap[b.id]=b;});
+    let all=[];
+    for(const d of dates){
+      try{
+        const r=await fetch(`scraper/reviews_detail/${d}.json?t=`+Date.now());
+        if(r.ok){
+          const arr=await r.json();
+          if(Array.isArray(arr)) arr.forEach(rev=>{
+            rev._date=d;
+            if(!rev.agm&&rev.branch_id){const br=bMap[rev.branch_id];if(br)rev.agm=br.agm;}
+            all.push(rev);
+          });
+        }
+      }catch(e){}
     }
-    if(!reviews.length){body.innerHTML='<div class="no-data">No reviews for today yet.</div>';return;}
-    const byAgm={};reviews.forEach(r=>{const a=r.agm||"Unknown";if(!byAgm[a])byAgm[a]=[];byAgm[a].push(r);});
-    let html=`<p style="color:var(--muted);font-size:12px;margin-bottom:16px">${reviews.length} reviews today</p>`;
-    Object.entries(byAgm).forEach(([agm,revs])=>{
-      html+=`<div class="agm-section-head"><h3>&#x1F464; ${agm}</h3><span class="badge b-green">${revs.length}</span></div>`;
-      revs.forEach(r=>{
-        const stars="\u2605".repeat(r.stars||0)+"\u2606".repeat(5-(r.stars||0));
-        html+=`<div class="review-card"><div class="review-top"><div><div class="reviewer">${r.reviewer||"Anonymous"}</div><div class="review-branch">${r.branch_name||""}</div></div><div class="review-meta"><div class="review-stars">${stars}</div><div class="review-date">${r.date_text||r.date||""}</div></div></div>${r.text?`<div class="review-text">${r.text}</div>`:""}</div>`;
-      });
-    });
-    body.innerHTML=html;
+    rvAll=all;
+    rvFDate="__all__";rvFBranch="__all__";rvFAgm="__all__";rvFRating=0;
+    renderReviews();
   }catch(e){body.innerHTML=`<div class="no-data">${e.message}</div>`;}
 }
 
-document.addEventListener("keydown",e=>{if(e.key==="Escape"){closePanel("liveOverlay");closePanel("todayOverlay");}});
+function renderReviews(){
+  const body=document.getElementById("reviewsBody");
+  const dates=[...new Set(rvAll.map(r=>r._date))].sort().reverse();
+  const branches=[...new Set(rvAll.map(r=>r.branch_name).filter(Boolean))].sort();
+  const agms=[...new Set(rvAll.map(r=>r.agm).filter(Boolean))].sort();
+
+  let filtered=rvAll;
+  if(rvFDate!=="__all__") filtered=filtered.filter(r=>r._date===rvFDate);
+  if(rvFBranch!=="__all__") filtered=filtered.filter(r=>r.branch_name===rvFBranch);
+  if(rvFAgm!=="__all__") filtered=filtered.filter(r=>r.agm===rvFAgm);
+  if(rvFRating>0) filtered=filtered.filter(r=>(r.stars||0)===rvFRating);
+
+  let h=`<div style="display:flex;flex-wrap:wrap;gap:10px;margin-bottom:16px;padding-bottom:14px;border-bottom:1px solid #e2e8f0">
+    <div style="display:flex;flex-direction:column;gap:4px">
+      <label style="font-size:10px;color:#94a3b8;text-transform:uppercase;letter-spacing:.5px;font-weight:600">Date</label>
+      <select onchange="rvFDate=this.value;renderReviews()" style="background:#f8fafc;border:1px solid #e2e8f0;color:#1a1a2e;padding:6px 10px;border-radius:7px;font-size:12px;min-width:120px">
+        <option value="__all__"${rvFDate==="__all__"?" selected":""}>All Dates</option>
+        ${dates.map(d=>`<option value="${d}"${rvFDate===d?" selected":""}>${d}</option>`).join("")}
+      </select>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:4px">
+      <label style="font-size:10px;color:#94a3b8;text-transform:uppercase;letter-spacing:.5px;font-weight:600">Branch</label>
+      <select onchange="rvFBranch=this.value;renderReviews()" style="background:#f8fafc;border:1px solid #e2e8f0;color:#1a1a2e;padding:6px 10px;border-radius:7px;font-size:12px;min-width:140px">
+        <option value="__all__"${rvFBranch==="__all__"?" selected":""}>All Branches</option>
+        ${branches.map(b=>`<option value="${b}"${rvFBranch===b?" selected":""}>${b}</option>`).join("")}
+      </select>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:4px">
+      <label style="font-size:10px;color:#94a3b8;text-transform:uppercase;letter-spacing:.5px;font-weight:600">AGM</label>
+      <div style="display:flex;flex-wrap:wrap;gap:5px">
+        <span onclick="rvFAgm='__all__';renderReviews()" style="padding:4px 10px;border-radius:16px;font-size:11px;font-weight:600;cursor:pointer;border:1px solid ${rvFAgm==="__all__"?"#6366f1":"#e2e8f0"};background:${rvFAgm==="__all__"?"rgba(99,102,241,.1)":"#f8fafc"};color:${rvFAgm==="__all__"?"#6366f1":"#64748b"}">All</span>
+        ${agms.map(a=>`<span onclick="rvFAgm='${a}';renderReviews()" style="padding:4px 10px;border-radius:16px;font-size:11px;font-weight:600;cursor:pointer;border:1px solid ${rvFAgm===a?"#6366f1":"#e2e8f0"};background:${rvFAgm===a?"rgba(99,102,241,.1)":"#f8fafc"};color:${rvFAgm===a?"#6366f1":"#64748b"}">${a}</span>`).join("")}
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:4px">
+      <label style="font-size:10px;color:#94a3b8;text-transform:uppercase;letter-spacing:.5px;font-weight:600">Rating</label>
+      <div style="display:flex;flex-wrap:wrap;gap:5px">
+        <span onclick="rvFRating=0;renderReviews()" style="padding:4px 10px;border-radius:16px;font-size:11px;font-weight:600;cursor:pointer;border:1px solid ${rvFRating===0?"#6366f1":"#e2e8f0"};background:${rvFRating===0?"rgba(99,102,241,.1)":"#f8fafc"};color:${rvFRating===0?"#6366f1":"#64748b"}">All</span>
+        ${[5,4,3,2,1].map(s=>`<span onclick="rvFRating=${s};renderReviews()" style="padding:4px 10px;border-radius:16px;font-size:11px;font-weight:600;cursor:pointer;border:1px solid ${rvFRating===s?"#6366f1":"#e2e8f0"};background:${rvFRating===s?"rgba(99,102,241,.1)":"#f8fafc"};color:${rvFRating===s?"#6366f1":"#64748b"}">${"\u2605".repeat(s)}</span>`).join("")}
+      </div>
+    </div>
+  </div>
+  <div style="font-size:12px;color:#94a3b8;margin-bottom:12px">${filtered.length} review${filtered.length!==1?"s":""} found${rvFDate!=="__all__"||rvFBranch!=="__all__"||rvFAgm!=="__all__"||rvFRating>0?` <span onclick="rvFDate='__all__';rvFBranch='__all__';rvFAgm='__all__';rvFRating=0;renderReviews()" style="color:#dc2626;cursor:pointer;text-decoration:underline;font-weight:600">Clear filters</span>`:""}</div>`;
+
+  if(!filtered.length){h+='<div class="no-data">No reviews match the filters.</div>';body.innerHTML=h;return;}
+
+  const byAgm={};
+  filtered.forEach(r=>{const a=r.agm||"Unknown";if(!byAgm[a])byAgm[a]=[];byAgm[a].push(r);});
+  Object.keys(byAgm).sort().forEach(agm=>{
+    const revs=byAgm[agm].sort((a,b)=>(b._date||"").localeCompare(a._date||""));
+    h+=`<div class="agm-section-head"><h3>&#x1F464; ${agm}</h3><span class="badge b-indigo">${revs.length}</span></div>`;
+    revs.forEach(r=>{
+      const stars="\u2605".repeat(r.stars||0)+"\u2606".repeat(5-(r.stars||0));
+      h+=`<div class="review-card"><div class="review-top"><div><div class="reviewer">${r.reviewer||"Anonymous"}</div><div class="review-branch">${r.branch_name||""}</div></div><div class="review-meta"><div class="review-stars">${stars}</div><div class="review-date">${r._date}${r.date_text?" \u00b7 "+r.date_text:""}</div></div></div>${r.text?`<div class="review-text">${r.text}</div>`:""}</div>`;
+    });
+  });
+  body.innerHTML=h;
+}
+
+document.addEventListener("keydown",e=>{if(e.key==="Escape"){closePanel("liveOverlay");closePanel("reviewsOverlay");}});
 init();
 </script>
 </body>
