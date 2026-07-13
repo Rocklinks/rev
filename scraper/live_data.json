@@ -6,37 +6,37 @@
       "id": 3,
       "name": "Thiruchendur-1",
       "agm": "Sivaperumal",
-      "total": 1276,
+      "total": 1280,
       "stars": 4.9,
       "baseline": 1275,
-      "live_new": 1
+      "live_new": 8
     },
     "1": {
       "id": 1,
       "name": "Tuticorin-1",
       "agm": "Sivaperumal",
-      "total": 7224,
+      "total": 7232,
       "stars": 4.9,
       "baseline": 7220,
-      "live_new": 4
+      "live_new": 31
     },
     "2": {
       "id": 2,
       "name": "Tuticorin-2",
       "agm": "Sivaperumal",
-      "total": 6478,
+      "total": 6483,
       "stars": 4.8,
       "baseline": 6474,
-      "live_new": 4
+      "live_new": 17
     },
     "4": {
       "id": 4,
       "name": "Thisayanvilai-1",
       "agm": "Sivaperumal",
-      "total": 406,
+      "total": 407,
       "stars": 5.0,
       "baseline": 404,
-      "live_new": 2
+      "live_new": 4
     },
     "5": {
       "id": 5,
@@ -45,43 +45,43 @@
       "total": 1125,
       "stars": 4.9,
       "baseline": 1125,
-      "live_new": 0
+      "live_new": 2
     },
     "6": {
       "id": 6,
       "name": "Udankudi",
       "agm": "Sivaperumal",
-      "total": 2046,
+      "total": 2047,
       "stars": 4.9,
       "baseline": 2046,
-      "live_new": 0
+      "live_new": 3
     },
     "7": {
       "id": 7,
       "name": "Tirunelveli-1",
       "agm": "Johnson",
-      "total": 4330,
+      "total": 4333,
       "stars": 4.8,
       "baseline": 4328,
-      "live_new": 2
+      "live_new": 13
     },
     "8": {
       "id": 8,
       "name": "Valliyur-1",
       "agm": "Johnson",
-      "total": 1197,
+      "total": 1198,
       "stars": 4.8,
       "baseline": 1196,
-      "live_new": 1
+      "live_new": 4
     },
     "9": {
       "id": 9,
       "name": "Ambasamudram-1",
       "agm": "Johnson",
-      "total": 954,
+      "total": 957,
       "stars": 4.9,
       "baseline": 954,
-      "live_new": 0
+      "live_new": 6
     },
     "10": {
       "id": 10,
@@ -96,10 +96,10 @@
       "id": 11,
       "name": "Nagercoil",
       "agm": "Jeeva",
-      "total": 3132,
+      "total": 3133,
       "stars": 4.7,
       "baseline": 3132,
-      "live_new": 0
+      "live_new": 5
     },
     "12": {
       "id": 12,
@@ -114,10 +114,10 @@
       "id": 13,
       "name": "Thuckalay-1",
       "agm": "Jeeva",
-      "total": 1144,
+      "total": 1146,
       "stars": 4.7,
       "baseline": 1142,
-      "live_new": 2
+      "live_new": 7
     },
     "14": {
       "id": 14,
@@ -126,16 +126,16 @@
       "total": 298,
       "stars": 4.9,
       "baseline": 298,
-      "live_new": 0
+      "live_new": 2
     },
     "15": {
       "id": 15,
       "name": "Kulasekharam-1",
       "agm": "Jeeva",
-      "total": 435,
+      "total": 436,
       "stars": 4.9,
       "baseline": 435,
-      "live_new": 0
+      "live_new": 1
     },
     "16": {
       "id": 16,
@@ -144,34 +144,34 @@
       "total": 383,
       "stars": 4.9,
       "baseline": 383,
-      "live_new": 0
+      "live_new": 1
     },
     "17": {
       "id": 17,
       "name": "Karungal-1",
       "agm": "Jeeva",
-      "total": 777,
+      "total": 781,
       "stars": 4.9,
       "baseline": 777,
-      "live_new": 0
+      "live_new": 4
     },
     "18": {
       "id": 18,
       "name": "Kovilpatti",
       "agm": "Seenivasan",
-      "total": 2559,
+      "total": 2561,
       "stars": 4.6,
       "baseline": 2559,
-      "live_new": 0
+      "live_new": 2
     },
     "19": {
       "id": 19,
       "name": "Ramnad",
       "agm": "Seenivasan",
-      "total": 2462,
+      "total": 2464,
       "stars": 4.8,
       "baseline": 2459,
-      "live_new": 3
+      "live_new": 6
     },
     "20": {
       "id": 20,
@@ -180,7 +180,7 @@
       "total": 1181,
       "stars": 4.9,
       "baseline": 1181,
-      "live_new": 0
+      "live_new": 4
     },
     "21": {
       "id": 21,
@@ -189,7 +189,7 @@
       "total": 678,
       "stars": 4.9,
       "baseline": 676,
-      "live_new": 2
+      "live_new": 4
     },
     "22": {
       "id": 22,
@@ -198,7 +198,7 @@
       "total": 641,
       "stars": 4.8,
       "baseline": 641,
-      "live_new": 0
+      "live_new": 1
     },
     "23": {
       "id": 23,
@@ -222,28 +222,28 @@
       "id": 25,
       "name": "Kayathar-1",
       "agm": "Seenivasan",
-      "total": 1017,
+      "total": 1018,
       "stars": 5.0,
       "baseline": 1017,
-      "live_new": 0
+      "live_new": 6
     },
     "26": {
       "id": 26,
       "name": "Thenkasi",
       "agm": "Muthuselvam",
-      "total": 6172,
+      "total": 6173,
       "stars": 4.9,
       "baseline": 6172,
-      "live_new": 0
+      "live_new": 3
     },
     "27": {
       "id": 27,
       "name": "Thenkasi-2",
       "agm": "Muthuselvam",
-      "total": 4002,
+      "total": 4005,
       "stars": 5.0,
       "baseline": 4000,
-      "live_new": 2
+      "live_new": 15
     },
     "28": {
       "id": 28,
@@ -252,34 +252,34 @@
       "total": 2290,
       "stars": 4.9,
       "baseline": 2289,
-      "live_new": 1
+      "live_new": 3
     },
     "29": {
       "id": 29,
       "name": "Puliyankudi-1",
       "agm": "Muthuselvam",
-      "total": 1031,
+      "total": 1034,
       "stars": 4.9,
       "baseline": 1031,
-      "live_new": 0
+      "live_new": 3
     },
     "30": {
       "id": 30,
       "name": "Sengottai-1",
       "agm": "Muthuselvam",
-      "total": 737,
+      "total": 739,
       "stars": 5.0,
       "baseline": 737,
-      "live_new": 0
+      "live_new": 5
     },
     "31": {
       "id": 31,
       "name": "Rajapalayam",
       "agm": "Muthuselvam",
-      "total": 2140,
+      "total": 2141,
       "stars": 4.8,
       "baseline": 2137,
-      "live_new": 3
+      "live_new": 11
     },
     "32": {
       "id": 32,
@@ -288,25 +288,25 @@
       "total": 2145,
       "stars": 4.8,
       "baseline": 2145,
-      "live_new": 0
+      "live_new": 1
     },
     "33": {
       "id": 33,
       "name": "Virudhunagar-2",
       "agm": "Venkadesan",
-      "total": 1744,
+      "total": 1745,
       "stars": 4.9,
       "baseline": 1744,
-      "live_new": 0
+      "live_new": 10
     },
     "34": {
       "id": 34,
       "name": "Aruppukottai",
       "agm": "Venkadesan",
-      "total": 2067,
+      "total": 2068,
       "stars": 4.8,
       "baseline": 2067,
-      "live_new": 0
+      "live_new": 2
     },
     "35": {
       "id": 35,
@@ -315,7 +315,7 @@
       "total": 997,
       "stars": 5.0,
       "baseline": 997,
-      "live_new": 0
+      "live_new": 2
     },
     "36": {
       "id": 36,
@@ -324,48 +324,48 @@
       "total": 1228,
       "stars": 4.8,
       "baseline": 1226,
-      "live_new": 2
+      "live_new": 4
     }
   },
   "agm_summary": {
     "Sivaperumal": {
-      "total_new": 11,
+      "total_new": 65,
       "branches": [
         {
           "id": 3,
           "name": "Thiruchendur-1",
           "agm": "Sivaperumal",
-          "total": 1276,
+          "total": 1280,
           "stars": 4.9,
           "baseline": 1275,
-          "live_new": 1
+          "live_new": 8
         },
         {
           "id": 1,
           "name": "Tuticorin-1",
           "agm": "Sivaperumal",
-          "total": 7224,
+          "total": 7232,
           "stars": 4.9,
           "baseline": 7220,
-          "live_new": 4
+          "live_new": 31
         },
         {
           "id": 2,
           "name": "Tuticorin-2",
           "agm": "Sivaperumal",
-          "total": 6478,
+          "total": 6483,
           "stars": 4.8,
           "baseline": 6474,
-          "live_new": 4
+          "live_new": 17
         },
         {
           "id": 4,
           "name": "Thisayanvilai-1",
           "agm": "Sivaperumal",
-          "total": 406,
+          "total": 407,
           "stars": 5.0,
           "baseline": 404,
-          "live_new": 2
+          "live_new": 4
         },
         {
           "id": 5,
@@ -374,16 +374,16 @@
           "total": 1125,
           "stars": 4.9,
           "baseline": 1125,
-          "live_new": 0
+          "live_new": 2
         },
         {
           "id": 6,
           "name": "Udankudi",
           "agm": "Sivaperumal",
-          "total": 2046,
+          "total": 2047,
           "stars": 4.9,
           "baseline": 2046,
-          "live_new": 0
+          "live_new": 3
         }
       ],
       "reviews": [
@@ -413,7 +413,7 @@
           "review_id": "ChZDSUhNMG9nS0VJQ0FnTURvNXItcFd3EAE",
           "reviewer": "Anonymous",
           "stars": 5,
-          "text": "Dear Sarath A, … More",
+          "text": "Dear Sarath A, \u2026 More",
           "date_text": "Edited 6 hours ago",
           "date": "2026-07-12",
           "branch_id": 3,
@@ -424,7 +424,7 @@
           "review_id": "Ci9DQUlRQUNvZENodHljRjlvT2w5RVRuRmhZWGgzUVd4R2EzZGpTbWRLTld4SmIwRRAB",
           "reviewer": "Anonymous",
           "stars": 1,
-          "text": "Dear alkaja Mohideen\nThank you for your feedback. … More",
+          "text": "Dear alkaja Mohideen\nThank you for your feedback. \u2026 More",
           "date_text": "6 hours ago",
           "date": "2026-07-12",
           "branch_id": 3,
@@ -479,7 +479,7 @@
           "review_id": "Ci9DQUlRQUNvZENodHljRjlvT20xUFgwbDJObGxyUkZoVGNsZFNUREZCYm1wMVZHYxAB",
           "reviewer": "Anonymous",
           "stars": 5,
-          "text": "Recently I purchase blue star Ac.. Staff Good explanation and affordable price thank you sathya✨💫 …",
+          "text": "Recently I purchase blue star Ac.. Staff Good explanation and affordable price thank you sathya\u2728\ud83d\udcab \u2026",
           "date_text": "20 minutes ago",
           "date": "2026-07-12",
           "branch_id": 1,
@@ -578,7 +578,7 @@
           "review_id": "Ci9DQUlRQUNvZENodHljRjlvT2xONFVtUjJWREJoYXpGQmExZERiRmxTWXpWQk5YYxAB",
           "reviewer": "Anonymous",
           "stars": 5,
-          "text": "Dear Ajith Kumar,\n\nThank you so much for your fantastic 5-star review! … More",
+          "text": "Dear Ajith Kumar,\n\nThank you so much for your fantastic 5-star review! \u2026 More",
           "date_text": "25 minutes ago",
           "date": "2026-07-12",
           "branch_id": 2,
@@ -600,7 +600,7 @@
           "review_id": "Ci9DQUlRQUNvZENodHljRjlvT2sxRldXMTZSVzFUV0RsaFlURmtSR2xJUVdNMU9GRRAB",
           "reviewer": "Anonymous",
           "stars": 5,
-          "text": "Dear S.R. Suresh,\n\nThank you so much for your fantastic 5-star review! … More",
+          "text": "Dear S.R. Suresh,\n\nThank you so much for your fantastic 5-star review! \u2026 More",
           "date_text": "48 minutes ago",
           "date": "2026-07-12",
           "branch_id": 2,
@@ -633,7 +633,7 @@
           "review_id": "Ci9DQUlRQUNvZENodHljRjlvT25SVWRVTllNV1ZDZDB4WlJuSkZRVlE0Vm5sUVFuYxAB",
           "reviewer": "Anonymous",
           "stars": 5,
-          "text": "Dear sakthi Rajendiran,\n\nThank you so much for your fantastic 5-star review! … More",
+          "text": "Dear sakthi Rajendiran,\n\nThank you so much for your fantastic 5-star review! \u2026 More",
           "date_text": "an hour ago",
           "date": "2026-07-12",
           "branch_id": 2,
@@ -655,7 +655,7 @@
           "review_id": "Ci9DQUlRQUNvZENodHljRjlvT25OdWNGbzBNVk41VFdONFRqaDZUMkl4TlUxaU1VRRAB",
           "reviewer": "Anonymous",
           "stars": 5,
-          "text": "Jenisha sister is very best ah panni kuduthanga niraiya offers and discount panni kuduthanga….veryyyy hpyyyy😍😍😍😍 …",
+          "text": "Jenisha sister is very best ah panni kuduthanga niraiya offers and discount panni kuduthanga\u2026.veryyyy hpyyyy\ud83d\ude0d\ud83d\ude0d\ud83d\ude0d\ud83d\ude0d \u2026",
           "date_text": "2 hours ago",
           "date": "2026-07-12",
           "branch_id": 2,
@@ -666,7 +666,7 @@
           "review_id": "Ci9DQUlRQUNvZENodHljRjlvT205NlJqZzNUa052YUhOT1ltMHdhbEJ6UmpOZk9FRRAB",
           "reviewer": "Anonymous",
           "stars": 5,
-          "text": "Dear Pardip Kumar,\n\nThank you so much for your fantastic 5-star review! … More",
+          "text": "Dear Pardip Kumar,\n\nThank you so much for your fantastic 5-star review! \u2026 More",
           "date_text": "2 hours ago",
           "date": "2026-07-12",
           "branch_id": 2,
@@ -677,7 +677,7 @@
           "review_id": "Ci9DQUlRQUNvZENodHljRjlvT25CamJGVkZXR2xxZVRKTlR6SjNXbnBEYWxNd1ZsRRAB",
           "reviewer": "Anonymous",
           "stars": 5,
-          "text": "Dear Raja durai,\n\nThank you so much for your fantastic 5-star review! … More",
+          "text": "Dear Raja durai,\n\nThank you so much for your fantastic 5-star review! \u2026 More",
           "date_text": "4 hours ago",
           "date": "2026-07-12",
           "branch_id": 2,
@@ -699,7 +699,7 @@
           "review_id": "Ci9DQUlRQUNvZENodHljRjlvT2xoemFscGxTelZFY0dWWlFrOUxPR2hETXpJM04wRRAB",
           "reviewer": "Anonymous",
           "stars": 5,
-          "text": "Excellent experience at Sathya, Thisaiyanvilai! The staff are very kind, friendly, and provide outstanding customer service. They patiently explained all the features and helped me choose the right phone. All iPhone models are available …",
+          "text": "Excellent experience at Sathya, Thisaiyanvilai! The staff are very kind, friendly, and provide outstanding customer service. They patiently explained all the features and helped me choose the right phone. All iPhone models are available \u2026",
           "date_text": "53 minutes ago",
           "date": "2026-07-12",
           "branch_id": 4,
@@ -721,7 +721,7 @@
           "review_id": "Ci9DQUlRQUNvZENodHljRjlvT25adE1uZE1VSEJSVWxveWF6ZDFUMFZoZGpoMk1rRRAB",
           "reviewer": "Anonymous",
           "stars": 5,
-          "text": "Good service and Excellent Promotors..😊 …",
+          "text": "Good service and Excellent Promotors..\ud83d\ude0a \u2026",
           "date_text": "23 hours ago",
           "date": "2026-07-12",
           "branch_id": 4,
@@ -732,7 +732,7 @@
           "review_id": "Ci9DQUlRQUNvZENodHljRjlvT21aRGFFUnplVk5YWjNOT2VXSkZhbWhhUkZNeVZsRRAB",
           "reviewer": "Anonymous",
           "stars": 5,
-          "text": "Excellent 🤩 …",
+          "text": "Excellent \ud83e\udd29 \u2026",
           "date_text": "5 hours ago",
           "date": "2026-07-12",
           "branch_id": 5,
@@ -775,34 +775,34 @@
       ]
     },
     "Johnson": {
-      "total_new": 4,
+      "total_new": 24,
       "branches": [
         {
           "id": 7,
           "name": "Tirunelveli-1",
           "agm": "Johnson",
-          "total": 4330,
+          "total": 4333,
           "stars": 4.8,
           "baseline": 4328,
-          "live_new": 2
+          "live_new": 13
         },
         {
           "id": 8,
           "name": "Valliyur-1",
           "agm": "Johnson",
-          "total": 1197,
+          "total": 1198,
           "stars": 4.8,
           "baseline": 1196,
-          "live_new": 1
+          "live_new": 4
         },
         {
           "id": 9,
           "name": "Ambasamudram-1",
           "agm": "Johnson",
-          "total": 954,
+          "total": 957,
           "stars": 4.9,
           "baseline": 954,
-          "live_new": 0
+          "live_new": 6
         },
         {
           "id": 10,
@@ -973,7 +973,7 @@
           "review_id": "Ci9DQUlRQUNvZENodHljRjlvT2tsaGRIRnhhVmhZY25OZllsRkdlV3RtTlROZmRXYxAB",
           "reviewer": "Anonymous",
           "stars": 5,
-          "text": "Dear Vishali,\n\nThank you so much for your fantastic 5-star review! … More",
+          "text": "Dear Vishali,\n\nThank you so much for your fantastic 5-star review! \u2026 More",
           "date_text": "5 hours ago",
           "date": "2026-07-12",
           "branch_id": 9,
@@ -984,7 +984,7 @@
           "review_id": "Ci9DQUlRQUNvZENodHljRjlvT2pSTlZuQTVNREIyV1hFMmNGWkRWa0ZKTTBSS2VuYxAB",
           "reviewer": "Anonymous",
           "stars": 5,
-          "text": "Mani 👍🏻 …",
+          "text": "Mani \ud83d\udc4d\ud83c\udffb \u2026",
           "date_text": "7 hours ago",
           "date": "2026-07-12",
           "branch_id": 9,
@@ -995,7 +995,7 @@
           "review_id": "Ci9DQUlRQUNvZENodHljRjlvT21oTGQxRmxZV3hsYzNKWVFqbENkRXh6ZFhFMlpWRRAB",
           "reviewer": "Anonymous",
           "stars": 5,
-          "text": "I recently purchased a phone from Sathya Agencies, Ambai branch, and had a great experience. Mr. Dhahir was extremely helpful and made the entire process very easy and smooth. He explained everything clearly and offered the phone at a very reasonable price. I truly appreciate the excellent customer service. Highly recommended! Good 💯 …",
+          "text": "I recently purchased a phone from Sathya Agencies, Ambai branch, and had a great experience. Mr. Dhahir was extremely helpful and made the entire process very easy and smooth. He explained everything clearly and offered the phone at a very reasonable price. I truly appreciate the excellent customer service. Highly recommended! Good \ud83d\udcaf \u2026",
           "date_text": "21 hours ago",
           "date": "2026-07-12",
           "branch_id": 9,
@@ -1005,16 +1005,16 @@
       ]
     },
     "Jeeva": {
-      "total_new": 3,
+      "total_new": 21,
       "branches": [
         {
           "id": 11,
           "name": "Nagercoil",
           "agm": "Jeeva",
-          "total": 3132,
+          "total": 3133,
           "stars": 4.7,
           "baseline": 3132,
-          "live_new": 0
+          "live_new": 5
         },
         {
           "id": 12,
@@ -1029,10 +1029,10 @@
           "id": 13,
           "name": "Thuckalay-1",
           "agm": "Jeeva",
-          "total": 1144,
+          "total": 1146,
           "stars": 4.7,
           "baseline": 1142,
-          "live_new": 2
+          "live_new": 7
         },
         {
           "id": 14,
@@ -1041,16 +1041,16 @@
           "total": 298,
           "stars": 4.9,
           "baseline": 298,
-          "live_new": 0
+          "live_new": 2
         },
         {
           "id": 15,
           "name": "Kulasekharam-1",
           "agm": "Jeeva",
-          "total": 435,
+          "total": 436,
           "stars": 4.9,
           "baseline": 435,
-          "live_new": 0
+          "live_new": 1
         },
         {
           "id": 16,
@@ -1059,16 +1059,16 @@
           "total": 383,
           "stars": 4.9,
           "baseline": 383,
-          "live_new": 0
+          "live_new": 1
         },
         {
           "id": 17,
           "name": "Karungal-1",
           "agm": "Jeeva",
-          "total": 777,
+          "total": 781,
           "stars": 4.9,
           "baseline": 777,
-          "live_new": 0
+          "live_new": 4
         }
       ],
       "reviews": [
@@ -1076,7 +1076,7 @@
           "review_id": "Ci9DQUlRQUNvZENodHljRjlvT2pjNVpVcEVhMWhMTVRsalowOXZiekpzYVdKRWRHYxAB",
           "reviewer": "Anonymous",
           "stars": 5,
-          "text": "Dear Omana Jenarthanan,\n\nThank you so much for your fantastic 5-star review! … More",
+          "text": "Dear Omana Jenarthanan,\n\nThank you so much for your fantastic 5-star review! \u2026 More",
           "date_text": "6 hours ago",
           "date": "2026-07-12",
           "branch_id": 11,
@@ -1153,7 +1153,7 @@
           "review_id": "Ci9DQUlRQUNvZENodHljRjlvT2pGalUySlFNRVJ5U1dsYVVERkJhRzlEWTAxUGRVRRAB",
           "reviewer": "Anonymous",
           "stars": 5,
-          "text": "Dear Befija Minnie,\n\nThank you so much for your fantastic 5-star review! … More",
+          "text": "Dear Befija Minnie,\n\nThank you so much for your fantastic 5-star review! \u2026 More",
           "date_text": "5 hours ago",
           "date": "2026-07-12",
           "branch_id": 13,
@@ -1219,7 +1219,7 @@
           "review_id": "Ci9DQUlRQUNvZENodHljRjlvT21FeVZYSjNOemRqU0dGZmNXUmhhMGRQV0ZvMWVXYxAB",
           "reviewer": "Anonymous",
           "stars": 5,
-          "text": "Sathya Monday market reno16 super mobile and photo shoot best ……..and colour wow💙💙💙tq sir Dinesh……and sathya team…. …",
+          "text": "Sathya Monday market reno16 super mobile and photo shoot best \u2026\u2026..and colour wow\ud83d\udc99\ud83d\udc99\ud83d\udc99tq sir Dinesh\u2026\u2026and sathya team\u2026. \u2026",
           "date_text": "21 hours ago",
           "date": "2026-07-12",
           "branch_id": 16,
@@ -1230,7 +1230,7 @@
           "review_id": "Ci9DQUlRQUNvZENodHljRjlvT25SNlEycFJNazlLTVhGb1ZGOUdMWE5PU2xjeVprRRAB",
           "reviewer": "Anonymous",
           "stars": 5,
-          "text": "Sathya product is good quality 👌 customer serives good 👍 fan is good product 👌\nStaff is good mentality of work …",
+          "text": "Sathya product is good quality \ud83d\udc4c customer serives good \ud83d\udc4d fan is good product \ud83d\udc4c\nStaff is good mentality of work \u2026",
           "date_text": "22 hours ago",
           "date": "2026-07-12",
           "branch_id": 17,
@@ -1240,25 +1240,25 @@
       ]
     },
     "Seenivasan": {
-      "total_new": 5,
+      "total_new": 23,
       "branches": [
         {
           "id": 18,
           "name": "Kovilpatti",
           "agm": "Seenivasan",
-          "total": 2559,
+          "total": 2561,
           "stars": 4.6,
           "baseline": 2559,
-          "live_new": 0
+          "live_new": 2
         },
         {
           "id": 19,
           "name": "Ramnad",
           "agm": "Seenivasan",
-          "total": 2462,
+          "total": 2464,
           "stars": 4.8,
           "baseline": 2459,
-          "live_new": 3
+          "live_new": 6
         },
         {
           "id": 20,
@@ -1267,7 +1267,7 @@
           "total": 1181,
           "stars": 4.9,
           "baseline": 1181,
-          "live_new": 0
+          "live_new": 4
         },
         {
           "id": 21,
@@ -1276,7 +1276,7 @@
           "total": 678,
           "stars": 4.9,
           "baseline": 676,
-          "live_new": 2
+          "live_new": 4
         },
         {
           "id": 22,
@@ -1285,7 +1285,7 @@
           "total": 641,
           "stars": 4.8,
           "baseline": 641,
-          "live_new": 0
+          "live_new": 1
         },
         {
           "id": 23,
@@ -1309,10 +1309,10 @@
           "id": 25,
           "name": "Kayathar-1",
           "agm": "Seenivasan",
-          "total": 1017,
+          "total": 1018,
           "stars": 5.0,
           "baseline": 1017,
-          "live_new": 0
+          "live_new": 6
         }
       ],
       "reviews": [
@@ -1353,7 +1353,7 @@
           "review_id": "Ci9DQUlRQUNvZENodHljRjlvT2t4aVRsbEVXV2x5WkV0T1pIcEpSVU5sWm1zelJVRRAB",
           "reviewer": "Anonymous",
           "stars": 5,
-          "text": "Dear Umaya selvam Umtu,\n\nThank you so much for your fantastic 5-star review! … More",
+          "text": "Dear Umaya selvam Umtu,\n\nThank you so much for your fantastic 5-star review! \u2026 More",
           "date_text": "22 minutes ago",
           "date": "2026-07-12",
           "branch_id": 19,
@@ -1452,7 +1452,7 @@
           "review_id": "Ci9DQUlRQUNvZENodHljRjlvT200ME9UZENNbnBhY21OcWRVa3lZeTF3TjBSdVlrRRAB",
           "reviewer": "Anonymous",
           "stars": 5,
-          "text": "Dear Jothiharigai A,\n\nThank you so much for your fantastic 5-star review! … More",
+          "text": "Dear Jothiharigai A,\n\nThank you so much for your fantastic 5-star review! \u2026 More",
           "date_text": "23 hours ago",
           "date": "2026-07-12",
           "branch_id": 20,
@@ -1573,7 +1573,7 @@
           "review_id": "Ci9DQUlRQUNvZENodHljRjlvT2xacFdsOUpTVFZFTlZkMmEzTldSMmRKZFROUVprRRAB",
           "reviewer": "Anonymous",
           "stars": 5,
-          "text": "Dear Gokul Ram,\n\nThank you so much for your fantastic 5-star review! … More",
+          "text": "Dear Gokul Ram,\n\nThank you so much for your fantastic 5-star review! \u2026 More",
           "date_text": "4 hours ago",
           "date": "2026-07-12",
           "branch_id": 25,
@@ -1638,25 +1638,25 @@
       ]
     },
     "Muthuselvam": {
-      "total_new": 6,
+      "total_new": 40,
       "branches": [
         {
           "id": 26,
           "name": "Thenkasi",
           "agm": "Muthuselvam",
-          "total": 6172,
+          "total": 6173,
           "stars": 4.9,
           "baseline": 6172,
-          "live_new": 0
+          "live_new": 3
         },
         {
           "id": 27,
           "name": "Thenkasi-2",
           "agm": "Muthuselvam",
-          "total": 4002,
+          "total": 4005,
           "stars": 5.0,
           "baseline": 4000,
-          "live_new": 2
+          "live_new": 15
         },
         {
           "id": 28,
@@ -1665,34 +1665,34 @@
           "total": 2290,
           "stars": 4.9,
           "baseline": 2289,
-          "live_new": 1
+          "live_new": 3
         },
         {
           "id": 29,
           "name": "Puliyankudi-1",
           "agm": "Muthuselvam",
-          "total": 1031,
+          "total": 1034,
           "stars": 4.9,
           "baseline": 1031,
-          "live_new": 0
+          "live_new": 3
         },
         {
           "id": 30,
           "name": "Sengottai-1",
           "agm": "Muthuselvam",
-          "total": 737,
+          "total": 739,
           "stars": 5.0,
           "baseline": 737,
-          "live_new": 0
+          "live_new": 5
         },
         {
           "id": 31,
           "name": "Rajapalayam",
           "agm": "Muthuselvam",
-          "total": 2140,
+          "total": 2141,
           "stars": 4.8,
           "baseline": 2137,
-          "live_new": 3
+          "live_new": 11
         }
       ],
       "reviews": [
@@ -1887,7 +1887,7 @@
           "review_id": "Ci9DQUlRQUNvZENodHljRjlvT2pKd1REQlllV0pmWm1RM2NYVkxaRU5PUXpoeVpVRRAB",
           "reviewer": "Anonymous",
           "stars": 5,
-          "text": "I purchased sam a17 mobile with free gift 🎁 thanks Sathyamangalam team …",
+          "text": "I purchased sam a17 mobile with free gift \ud83c\udf81 thanks Sathyamangalam team \u2026",
           "date_text": "22 hours ago",
           "date": "2026-07-12",
           "branch_id": 29,
@@ -1909,7 +1909,7 @@
           "review_id": "Ci9DQUlRQUNvZENodHljRjlvT2w5V1VGSkpOVXBzTnpKeE1VWkxNSGxyVWtsZlZFRRAB",
           "reviewer": "Anonymous",
           "stars": 5,
-          "text": "Dear Murugan Murugan,\n\nThank you so much for your fantastic 5-star review! … More",
+          "text": "Dear Murugan Murugan,\n\nThank you so much for your fantastic 5-star review! \u2026 More",
           "date_text": "an hour ago",
           "date": "2026-07-12",
           "branch_id": 30,
@@ -1997,7 +1997,7 @@
           "review_id": "Ci9DQUlRQUNvZENodHljRjlvT2tObWJuZ3hjekJPZEd4TmFqTXRWMTlyWjNoWVJXYxAB",
           "reviewer": "Anonymous",
           "stars": 5,
-          "text": "Godràj wm brais best brairs mari muthu good",
+          "text": "Godr\u00e0j wm brais best brairs mari muthu good",
           "date_text": "an hour ago",
           "date": "2026-07-12",
           "branch_id": 31,
@@ -2030,7 +2030,7 @@
           "review_id": "Ci9DQUlRQUNvZENodHljRjlvT2twR1dXZ3ROM1p3VFdKTGJYaGFMVGcyTkdkUUxYYxAB",
           "reviewer": "Anonymous",
           "stars": 5,
-          "text": "Dear Subra Mani,\n\nThank you so much for your fantastic 5-star review! … More",
+          "text": "Dear Subra Mani,\n\nThank you so much for your fantastic 5-star review! \u2026 More",
           "date_text": "4 hours ago",
           "date": "2026-07-12",
           "branch_id": 31,
@@ -2062,7 +2062,7 @@
       ]
     },
     "Venkadesan": {
-      "total_new": 2,
+      "total_new": 19,
       "branches": [
         {
           "id": 32,
@@ -2071,25 +2071,25 @@
           "total": 2145,
           "stars": 4.8,
           "baseline": 2145,
-          "live_new": 0
+          "live_new": 1
         },
         {
           "id": 33,
           "name": "Virudhunagar-2",
           "agm": "Venkadesan",
-          "total": 1744,
+          "total": 1745,
           "stars": 4.9,
           "baseline": 1744,
-          "live_new": 0
+          "live_new": 10
         },
         {
           "id": 34,
           "name": "Aruppukottai",
           "agm": "Venkadesan",
-          "total": 2067,
+          "total": 2068,
           "stars": 4.8,
           "baseline": 2067,
-          "live_new": 0
+          "live_new": 2
         },
         {
           "id": 35,
@@ -2098,7 +2098,7 @@
           "total": 997,
           "stars": 5.0,
           "baseline": 997,
-          "live_new": 0
+          "live_new": 2
         },
         {
           "id": 36,
@@ -2107,7 +2107,7 @@
           "total": 1228,
           "stars": 4.8,
           "baseline": 1226,
-          "live_new": 2
+          "live_new": 4
         }
       ],
       "reviews": [
@@ -2126,7 +2126,7 @@
           "review_id": "Ci9DQUlRQUNvZENodHljRjlvT2prMmNVVlNlbXhyVGxOR1NuZGpiMms0WjNSQk1rRRAB",
           "reviewer": "Anonymous",
           "stars": 5,
-          "text": "Good explain and thankyou sathya 💐 …",
+          "text": "Good explain and thankyou sathya \ud83d\udc90 \u2026",
           "date_text": "3 hours ago",
           "date": "2026-07-12",
           "branch_id": 33,
@@ -2236,7 +2236,7 @@
           "review_id": "Ci9DQUlRQUNvZENodHljRjlvT2xOaVNuUnhNa0ZXVVhSeFVYTTBaRUZ3Y2tndE5uYxAB",
           "reviewer": "Anonymous",
           "stars": 5,
-          "text": "I had a very good experience with sathya agency the showroom aruppukottai best demo service best 👌 …",
+          "text": "I had a very good experience with sathya agency the showroom aruppukottai best demo service best \ud83d\udc4c \u2026",
           "date_text": "22 hours ago",
           "date": "2026-07-12",
           "branch_id": 34,
@@ -2269,7 +2269,7 @@
           "review_id": "Ci9DQUlRQUNvZENodHljRjlvT25CaFQxcHlhV0V4TVRBMlZHcHlNMGx5WldkbVNsRRAB",
           "reviewer": "Anonymous",
           "stars": 5,
-          "text": "⭐⭐⭐⭐⭐\n\nI recently purchased a Prestige mixer grinder and I'm very happy with its …",
+          "text": "\u2b50\u2b50\u2b50\u2b50\u2b50\n\nI recently purchased a Prestige mixer grinder and I'm very happy with its \u2026",
           "date_text": "23 hours ago",
           "date": "2026-07-12",
           "branch_id": 35,
