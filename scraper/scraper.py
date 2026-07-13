@@ -465,9 +465,12 @@ def save_results(results, success, failed, snap_date, run_time):
         fpath = detail_dir/f"{date_key}.json"
         existing = []
         if fpath.exists():
-            try: existing = json.loads(fpath.read_text(encoding="utf-8"))
+            try:
+                loaded = json.loads(fpath.read_text(encoding="utf-8"))
+                if isinstance(loaded, list):
+                    existing = [x for x in loaded if isinstance(x, dict)]
             except Exception: pass
-        existing_ids = {rv["review_id"] for rv in existing}
+        existing_ids = {rv["review_id"] for rv in existing if isinstance(rv, dict)}
         merged = existing + [rv for rv in revs if rv["review_id"] not in existing_ids]
         fpath.write_text(json.dumps(merged, indent=2, ensure_ascii=False), encoding="utf-8")
         print(f"  Saved {len(merged)} reviews -> {fpath}", flush=True)
@@ -480,12 +483,14 @@ def save_results(results, success, failed, snap_date, run_time):
             loaded = json.loads(all_reviews_file.read_text(encoding="utf-8"))
             if isinstance(loaded, list):
                 for rv in loaded:
-                    all_existing[rv.get("review_id","")] = rv
+                    if isinstance(rv, dict) and "review_id" in rv:
+                        all_existing[rv["review_id"]] = rv
             elif isinstance(loaded, dict):
                 all_existing = loaded
         except Exception: pass
     for rv in all_reviews:
-        all_existing[rv.get("review_id","")] = rv
+        if isinstance(rv, dict) and "review_id" in rv:
+            all_existing[rv["review_id"]] = rv
     all_reviews_file.write_text(json.dumps(list(all_existing.values()), indent=2, ensure_ascii=False), encoding="utf-8")
     print(f"  Saved all_reviews.json — {len(all_existing)} total reviews", flush=True)
 
