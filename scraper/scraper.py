@@ -230,16 +230,19 @@ async def extract_review_cards(page):
                 # Reviewer name — try multiple strategies
                 reviewer = "Anonymous"
                 for ns in [
-                    'button[jsaction]',
-                    '[data-review-id] button:first-of-type',
                     'a[href*="contrib"]',
+                    'button[jsaction*="reviewer"]',
+                    'button[jsaction*="profile"]',
+                    'span[class*="fontBodyMedium"] button',
+                    'div.fontBodyMedium span',
+                    'button[jsaction]',
                     'div[role="button"]',
                 ]:
                     try:
                         ne = blk.locator(ns).first
                         if await ne.count() > 0:
                             t = await get_text(ne)
-                            if t and len(t) < 50 and not re.search(r"ago|day|week|month|year", t, re.I):
+                            if t and len(t) < 50 and not re.search(r"ago|day|week|month|year|Edited|star|Rated", t, re.I):
                                 reviewer = t; break
                     except Exception: pass
 
@@ -273,6 +276,17 @@ async def extract_review_cards(page):
     if not reviews_found:
         try:
             html = await page.content()
+            # Try to extract contributor names from HTML
+            contributor_names = {}
+            for m in re.finditer(r'data-contributor-id="([^"]+)".*?aria-label="([^"]+)"', html, re.S):
+                contributor_names[m.group(1)] = m.group(2)
+            # Also try profile links pattern
+            for m in re.finditer(r'href="/maps/contrib/(\d+)[^"]*"[^>]*>([^<]+)<', html):
+                cid = m.group(1)
+                name = m.group(2).strip()
+                if name and len(name) < 50 and not re.search(r'review|photo|answer', name, re.I):
+                    contributor_names[cid] = name
+
             review_blocks = re.findall(
                 r'\["((?:[^"\\]|\\.){10,200})",\s*\[.*?\],\s*"([^"]*?(?:ago|yesterday|day|week|month|year)[^"]*?)"',
                 html, re.I
@@ -280,9 +294,14 @@ async def extract_review_cards(page):
             for idx, (review_text, date_text) in enumerate(review_blocks):
                 parsed = parse_relative_date(date_text, today_ist_dt)
                 if parsed:
+                    # Try to find a reviewer name near this review block
+                    rev_name = "Anonymous"
+                    for cid, name in contributor_names.items():
+                        if name in html[:html.find(review_text)] if review_text in html else "":
+                            rev_name = name; break
                     reviews_found.append({
                         "review_id": f"html_{idx}",
-                        "reviewer": "Anonymous",
+                        "reviewer": rev_name,
                         "stars": 0,
                         "text": review_text[:500],
                         "date_text": date_text,
