@@ -350,7 +350,7 @@ async def scrape_branch(browser, branch):
                         await page.wait_for_timeout(2000)
             except Exception: pass
 
-            # Scroll down to load more reviews
+            # Scroll down to load more reviews (stop at 50)
             for _ in range(30):
                 try:
                     panel_sel = '[tabindex="-1"]'
@@ -359,6 +359,12 @@ async def scrape_branch(browser, branch):
                     await page.keyboard.press("End")
                 except Exception: pass
                 await page.wait_for_timeout(1000)
+                # Stop if we have enough reviews
+                try:
+                    rev_count = await page.locator('[data-review-id]').count()
+                    if rev_count >= 50:
+                        break
+                except Exception: pass
 
             reviews = await extract_review_cards(page)
             result["reviews"] = reviews

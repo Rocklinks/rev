@@ -379,6 +379,13 @@ function renderDashboard(){
     <div class="kpi kpi-4"><div class="kpi-icon">&#x2B50;</div><div class="kpi-glow"></div><div class="kpi-label">Avg Rating</div><div class="kpi-value" style="color:var(--teal)">${s.avgStars||"—"}</div><div class="kpi-sub">out of 5.0</div></div>
   </div>`;
 
+  // Date filter for dashboard
+  let dateOptsDash=dates.map(d=>`<option value="${d}"${d===selDate?" selected":""}>${d}</option>`).join("");
+  html+=`<div style="display:flex;align-items:center;gap:10px;margin-bottom:18px;padding:10px 16px;background:var(--card);border:1px solid var(--border);border-radius:12px">
+    <span style="font-size:13px;font-weight:600;color:var(--text)">&#x1F4C5; Filter by Date:</span>
+    <select class="fsel" onchange="selDate=this.value;renderCurrentView()" style="margin:0">${dateOptsDash}</select>
+  </div>`;
+
   // Charts
   const branches=D.branches||{};
   const topBranches=filtered.map(b=>{
@@ -592,7 +599,7 @@ async function openLive(){
       if(!g)return;
       html+=`<div class="agm-section-head"><h3>&#x1F464; ${agm}</h3><span class="badge b-green">+${g.total_today} new</span></div>`;
       (g.branches||[]).forEach(b=>{
-        html+=`<div class="live-card"><div><div class="live-name">${b.name}</div><div class="live-agm">Total: ${(b.total||0).toLocaleString()} &middot; Baseline: ${(b.baseline||0).toLocaleString()}</div></div><div style="text-align:right"><div class="live-new">+${b.today_count||0}</div><div class="live-sub">since 12 AM</div></div></div>`;
+        html+=`<div class="live-card"><div><div class="live-name">${b.name}</div><div class="live-agm">Total: ${(b.total||0).toLocaleString()} &middot; Baseline: ${(b.baseline||0).toLocaleString()}</div></div><div style="text-align:right"><div class="live-new">+${b.live_new||0}</div><div class="live-sub">since 12 AM</div></div></div>`;
       });
     });
     if(!html.includes("agm-section-head")) html+='<div class="no-data">No data. Run live_tracker.py first.</div>';
@@ -619,12 +626,12 @@ async function openReviews(){
 
 function renderReviews(){
   const body=document.getElementById("reviewsBody");
-  const dates=[...new Set(rvAll.map(r=>r._date))].sort().reverse();
+  const dates=[...new Set(rvAll.map(r=>r.date||r._date))].sort().reverse();
   const branches=[...new Set(rvAll.map(r=>r.branch_name).filter(Boolean))].sort();
   const agms=[...new Set(rvAll.map(r=>r.agm).filter(Boolean))].sort();
 
   let filtered=rvAll;
-  if(rvFDate!=="__all__") filtered=filtered.filter(r=>r._date===rvFDate);
+  if(rvFDate!=="__all__") filtered=filtered.filter(r=>(r.date||r._date)===rvFDate);
   if(rvFBranch!=="__all__") filtered=filtered.filter(r=>r.branch_name===rvFBranch);
   if(rvFAgm!=="__all__") filtered=filtered.filter(r=>r.agm===rvFAgm);
   if(rvFRating>0) filtered=filtered.filter(r=>(r.stars||0)===rvFRating);

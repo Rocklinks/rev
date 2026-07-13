@@ -219,12 +219,14 @@ async def count_reviews_by_scroll(page, today_str):
 
                 if parsed == today_str:
                     today_count += 1
+                    if today_count >= 50:
+                        break
                 elif parsed < today_str:
                     found_older_than_today = True
                     break
             except Exception: continue
 
-        if found_older_than_today:
+        if today_count >= 50 or found_older_than_today:
             break
 
         # Scroll down
