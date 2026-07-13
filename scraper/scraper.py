@@ -457,34 +457,29 @@ def save_results(results, success, failed, snap_date, yesterday, run_time):
             all_reviews.append({**rev,"branch_id":b["id"],"branch_name":b["name"],"agm":b["agm"]})
     detail_dir = DATA_FILE.parent/"reviews_detail"
     detail_dir.mkdir(parents=True, exist_ok=True)
-    detail_path = detail_dir/f"{yesterday}.json"
-    existing = []
-    if detail_path.exists():
-        try: existing = json.loads(detail_path.read_text(encoding="utf-8"))
-        except Exception: pass
-    existing_ids = {rv["review_id"] for rv in existing}
-    merged = existing + [rv for rv in all_reviews if rv["review_id"] not in existing_ids]
-    detail_path.write_text(json.dumps(merged, indent=2, ensure_ascii=False), encoding="utf-8")
-    print(f"  Saved {len(merged)} reviews -> {detail_path}", flush=True)
 
-    # Also save today's reviews (snap_date)
-    today_path = detail_dir/f"{snap_date}.json"
-    today_reviews = [rv for rv in all_reviews if rv.get("date") == snap_date]
-    if today_reviews:
-        existing_today = []
-        if today_path.exists():
-            try: existing_today = json.loads(today_path.read_text(encoding="utf-8"))
+    # Group reviews by their actual date and save each to correct file
+    by_date = {}
+    for rv in all_reviews:
+        d = rv.get("date", yesterday)
+        by_date.setdefault(d, []).append(rv)
+
+    for date_key, revs in by_date.items():
+        fpath = detail_dir/f"{date_key}.json"
+        existing = []
+        if fpath.exists():
+            try: existing = json.loads(fpath.read_text(encoding="utf-8"))
             except Exception: pass
-        existing_today_ids = {rv["review_id"] for rv in existing_today}
-        merged_today = existing_today + [rv for rv in today_reviews if rv["review_id"] not in existing_today_ids]
-        today_path.write_text(json.dumps(merged_today, indent=2, ensure_ascii=False), encoding="utf-8")
-        print(f"  Saved {len(merged_today)} today reviews -> {today_path}", flush=True)
+        existing_ids = {rv["review_id"] for rv in existing}
+        merged = existing + [rv for rv in revs if rv["review_id"] not in existing_ids]
+        fpath.write_text(json.dumps(merged, indent=2, ensure_ascii=False), encoding="utf-8")
+        print(f"  Saved {len(merged)} reviews -> {fpath}", flush=True)
 
     data.setdefault("logs",[]).insert(0,{
         "ran_at":run_time,"snap_date":snap_date,"yesterday":yesterday,
         "baseline_date":baseline_date,"success":success,
         "failed":len(failed),"failed_names":failed,
-        "total_yesterday_reviews":len(merged),
+        "total_yesterday_reviews":len(by_date.get(yesterday,[])),
     })
     data["logs"] = data["logs"][:50]
     data["last_updated"] = run_time
