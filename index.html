@@ -608,7 +608,7 @@ async function openLive(){
 }
 
 // ── REVIEWS PANEL ────────────────────────────────────────────
-let rvAll=[], rvFDate="__all__", rvFBranch="__all__", rvFAgm="__all__", rvFRating=0;
+let rvAll=[], rvFDate="__all__", rvSelBranch=null;
 
 async function openReviews(){
   document.getElementById("reviewsOverlay").classList.add("open");
@@ -619,22 +619,28 @@ async function openReviews(){
     if(!r.ok)throw new Error("No reviews data");
     const all=await r.json();
     rvAll=Array.isArray(all)?all:[];
-    rvFDate="__all__";rvFBranch="__all__";rvFAgm="__all__";rvFRating=0;
+    rvFDate="__all__"; rvSelBranch=null;
     renderReviews();
   }catch(e){body.innerHTML=`<div class="no-data">${e.message}</div>`;}
 }
 
 function renderReviews(){
+  if(rvSelBranch) return renderBranchReviews();
   const body=document.getElementById("reviewsBody");
   const dates=[...new Set(rvAll.map(r=>r.date||r._date))].sort().reverse();
-  const branches=[...new Set(rvAll.map(r=>r.branch_name).filter(Boolean))].sort();
-  const agms=[...new Set(rvAll.map(r=>r.agm).filter(Boolean))].sort();
 
   let filtered=rvAll;
   if(rvFDate!=="__all__") filtered=filtered.filter(r=>(r.date||r._date)===rvFDate);
-  if(rvFBranch!=="__all__") filtered=filtered.filter(r=>r.branch_name===rvFBranch);
-  if(rvFAgm!=="__all__") filtered=filtered.filter(r=>r.agm===rvFAgm);
-  if(rvFRating>0) filtered=filtered.filter(r=>(r.stars||0)===rvFRating);
+
+  // Aggregate by branch
+  const byBranch={};
+  filtered.forEach(r=>{
+    const b=r.branch_name||"Unknown";
+    if(!byBranch[b]) byBranch[b]={branch:b, agm:r.agm||"", count:0, stars:[]};
+    byBranch[b].count++;
+    if(r.stars) byBranch[b].stars.push(r.stars);
+  });
+  const branches=Object.values(byBranch).sort((a,b)=>b.count-a.count);
 
   let h=`<div style="display:flex;flex-wrap:wrap;gap:10px;margin-bottom:16px;padding-bottom:14px;border-bottom:1px solid #e2e8f0">
     <div style="display:flex;flex-direction:column;gap:4px">
@@ -645,40 +651,61 @@ function renderReviews(){
       </select>
     </div>
     <div style="display:flex;flex-direction:column;gap:4px">
-      <label style="font-size:10px;color:#94a3b8;text-transform:uppercase;letter-spacing:.5px;font-weight:600">Branch</label>
-      <select onchange="rvFBranch=this.value;renderReviews()" style="background:#f8fafc;border:1px solid #e2e8f0;color:#1a1a2e;padding:6px 10px;border-radius:7px;font-size:12px;min-width:140px">
-        <option value="__all__"${rvFBranch==="__all__"?" selected":""}>All Branches</option>
-        ${branches.map(b=>`<option value="${b}"${rvFBranch===b?" selected":""}>${b}</option>`).join("")}
-      </select>
+      <label style="font-size:10px;color:#94a3b8;text-transform:uppercase;letter-spacing:.5px;font-weight:600">Total</label>
+      <div style="padding:6px 10px;font-size:13px;font-weight:700;color:#1a1a2e">${branches.reduce((s,b)=>s+b.count,0)} reviews &middot; ${branches.length} branches</div>
     </div>
-    <div style="display:flex;flex-direction:column;gap:4px">
-      <label style="font-size:10px;color:#94a3b8;text-transform:uppercase;letter-spacing:.5px;font-weight:600">AGM</label>
-      <div style="display:flex;flex-wrap:wrap;gap:5px">
-        <span onclick="rvFAgm='__all__';renderReviews()" style="padding:4px 10px;border-radius:16px;font-size:11px;font-weight:600;cursor:pointer;border:1px solid ${rvFAgm==="__all__"?"#6366f1":"#e2e8f0"};background:${rvFAgm==="__all__"?"rgba(99,102,241,.1)":"#f8fafc"};color:${rvFAgm==="__all__"?"#6366f1":"#64748b"}">All</span>
-        ${agms.map(a=>`<span onclick="rvFAgm='${a}';renderReviews()" style="padding:4px 10px;border-radius:16px;font-size:11px;font-weight:600;cursor:pointer;border:1px solid ${rvFAgm===a?"#6366f1":"#e2e8f0"};background:${rvFAgm===a?"rgba(99,102,241,.1)":"#f8fafc"};color:${rvFAgm===a?"#6366f1":"#64748b"}">${a}</span>`).join("")}
-      </div>
-    </div>
-    <div style="display:flex;flex-direction:column;gap:4px">
-      <label style="font-size:10px;color:#94a3b8;text-transform:uppercase;letter-spacing:.5px;font-weight:600">Rating</label>
-      <div style="display:flex;flex-wrap:wrap;gap:5px">
-        <span onclick="rvFRating=0;renderReviews()" style="padding:4px 10px;border-radius:16px;font-size:11px;font-weight:600;cursor:pointer;border:1px solid ${rvFRating===0?"#6366f1":"#e2e8f0"};background:${rvFRating===0?"rgba(99,102,241,.1)":"#f8fafc"};color:${rvFRating===0?"#6366f1":"#64748b"}">All</span>
-        ${[5,4,3,2,1].map(s=>`<span onclick="rvFRating=${s};renderReviews()" style="padding:4px 10px;border-radius:16px;font-size:11px;font-weight:600;cursor:pointer;border:1px solid ${rvFRating===s?"#6366f1":"#e2e8f0"};background:${rvFRating===s?"rgba(99,102,241,.1)":"#f8fafc"};color:${rvFRating===s?"#6366f1":"#64748b"}">${"\u2605".repeat(s)}</span>`).join("")}
-      </div>
-    </div>
-  </div>
-  <div style="font-size:12px;color:#94a3b8;margin-bottom:12px">${filtered.length} review${filtered.length!==1?"s":""} found${rvFDate!=="__all__"||rvFBranch!=="__all__"||rvFAgm!=="__all__"||rvFRating>0?` <span onclick="rvFDate='__all__';rvFBranch='__all__';rvFAgm='__all__';rvFRating=0;renderReviews()" style="color:#dc2626;cursor:pointer;text-decoration:underline;font-weight:600">Clear filters</span>`:""}</div>`;
+  </div>`;
 
-  if(!filtered.length){h+='<div class="no-data">No reviews match the filters.</div>';body.innerHTML=h;return;}
+  if(!branches.length){h+='<div class="no-data">No reviews found.</div>';body.innerHTML=h;return;}
 
+  // Group by AGM
   const byAgm={};
-  filtered.forEach(r=>{const a=r.agm||"Unknown";if(!byAgm[a])byAgm[a]=[];byAgm[a].push(r);});
+  branches.forEach(b=>{const a=b.agm||"Unknown";if(!byAgm[a])byAgm[a]=[];byAgm[a].push(b);});
+
   Object.keys(byAgm).sort().forEach(agm=>{
-    const revs=byAgm[agm].sort((a,b)=>(b._date||"").localeCompare(a._date||""));
-    h+=`<div class="agm-section-head"><h3>&#x1F464; ${agm}</h3><span class="badge b-indigo">${revs.length}</span></div>`;
-    revs.forEach(r=>{
-      const stars="\u2605".repeat(r.stars||0)+"\u2606".repeat(5-(r.stars||0));
-      h+=`<div class="review-card"><div class="review-top"><div><div class="reviewer">${r.reviewer||"Anonymous"}</div><div class="review-branch">${r.branch_name||""}</div></div><div class="review-meta"><div class="review-stars">${stars}</div><div class="review-date">${r._date}${r.date_text?" \u00b7 "+r.date_text:""}</div></div></div>${r.text?`<div class="review-text">${r.text}</div>`:""}</div>`;
+    const brs=byAgm[agm];
+    const agmTotal=brs.reduce((s,b)=>s+b.count,0);
+    h+=`<div class="agm-section-head"><h3>&#x1F464; ${agm}</h3><span class="badge b-indigo">${agmTotal} reviews</span></div>`;
+    h+=`<div style="margin-bottom:20px"><table style="width:100%">
+      <thead><tr><th style="text-align:left">Branch</th><th style="text-align:center">Reviews</th><th style="text-align:center">Avg Stars</th><th></th></tr></thead>
+      <tbody>`;
+    brs.sort((a,b)=>b.count-a.count).forEach(b=>{
+      const avg=b.stars.length?(b.stars.reduce((s,v)=>s+v,0)/b.stars.length).toFixed(1):"—";
+      const starStr=b.stars.length?`\u2605${avg}`:"";
+      h+=`<tr style="cursor:pointer;border-bottom:1px solid #f1f5f9" onclick="rvSelBranch='${b.branch.replace(/'/g,"\\'")}';renderReviews()">
+        <td style="padding:10px 12px;font-weight:600;color:#1a1a2e;font-size:13px">${b.branch}</td>
+        <td style="padding:10px 12px;text-align:center;font-family:var(--mono);font-weight:700;color:#6366f1;font-size:13px">${b.count}</td>
+        <td style="padding:10px 12px;text-align:center;color:#f59e0b;font-size:13px;font-weight:600">${starStr}</td>
+        <td style="padding:10px 12px;text-align:right;font-size:11px;color:#94a3b8">\u25B6</td>
+      </tr>`;
     });
+    h+=`</tbody></table></div>`;
+  });
+  body.innerHTML=h;
+}
+
+function renderBranchReviews(){
+  const body=document.getElementById("reviewsBody");
+  const revs=rvAll.filter(r=>r.branch_name===rvSelBranch);
+  const agm=revs.length?revs[0].agm:"";
+  const stars=revs.filter(r=>r.stars).map(r=>r.stars);
+  const avg=stars.length?(stars.reduce((s,v)=>s+v,0)/stars.length).toFixed(1):"—";
+
+  let h=`<div style="margin-bottom:16px">
+    <span onclick="rvSelBranch=null;renderReviews()" style="cursor:pointer;color:#6366f1;font-size:13px;font-weight:600">\u2190 Back to all branches</span>
+  </div>
+  <div style="display:flex;align-items:center;gap:14px;margin-bottom:18px;padding:14px 16px;background:var(--surface);border:1px solid var(--border);border-radius:12px">
+    <div>
+      <div style="font-size:16px;font-weight:700;color:var(--text)">${rvSelBranch}</div>
+      <div style="font-size:12px;color:var(--muted);margin-top:2px">&#x1F464; ${agm} &middot; ${revs.length} reviews &middot; \u2605 ${avg}</div>
+    </div>
+  </div>`;
+
+  if(!revs.length){h+='<div class="no-data">No reviews found for this branch.</div>';body.innerHTML=h;return;}
+
+  revs.sort((a,b)=>(b.stars||0)-(a.stars||0)).forEach(r=>{
+    const s="\u2605".repeat(r.stars||0)+"\u2606".repeat(5-(r.stars||0));
+    h+=`<div class="review-card"><div class="review-top"><div><div class="reviewer">${r.reviewer||"Anonymous"}</div></div><div class="review-meta"><div class="review-stars">${s}</div></div></div>${r.text?`<div class="review-text">${r.text}</div>`:""}</div>`;
   });
   body.innerHTML=h;
 }
