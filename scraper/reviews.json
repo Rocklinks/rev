@@ -13511,7 +13511,7 @@
         "has_deletion": false,
         "monthly": 23,
         "star_rating": 5.0,
-        "yesterday_reviews": 6
+        "yesterday_reviews": 10
       },
       "5": {
         "total_snap": 1125,
@@ -13520,7 +13520,7 @@
         "has_deletion": false,
         "monthly": 28,
         "star_rating": 4.9,
-        "yesterday_reviews": 4
+        "yesterday_reviews": 10
       },
       "6": {
         "total_snap": 2047,
@@ -13529,7 +13529,7 @@
         "has_deletion": false,
         "monthly": 34,
         "star_rating": 4.9,
-        "yesterday_reviews": 6
+        "yesterday_reviews": 10
       },
       "7": {
         "total_snap": 4333,
@@ -13547,7 +13547,7 @@
         "has_deletion": false,
         "monthly": 38,
         "star_rating": 4.8,
-        "yesterday_reviews": 4
+        "yesterday_reviews": 10
       },
       "9": {
         "total_snap": 957,
@@ -13565,7 +13565,7 @@
         "has_deletion": false,
         "monthly": 16,
         "star_rating": 4.9,
-        "yesterday_reviews": 2
+        "yesterday_reviews": 6
       },
       "11": {
         "total_snap": 3133,
@@ -13574,7 +13574,7 @@
         "has_deletion": true,
         "monthly": 84,
         "star_rating": 4.7,
-        "yesterday_reviews": 9
+        "yesterday_reviews": 10
       },
       "12": {
         "total_snap": 1143,
@@ -13583,7 +13583,7 @@
         "has_deletion": false,
         "monthly": 24,
         "star_rating": 4.7,
-        "yesterday_reviews": 1
+        "yesterday_reviews": 6
       },
       "13": {
         "total_snap": 1146,
@@ -13601,7 +13601,7 @@
         "has_deletion": false,
         "monthly": 19,
         "star_rating": 4.9,
-        "yesterday_reviews": 5
+        "yesterday_reviews": 10
       },
       "15": {
         "total_snap": 436,
@@ -13610,7 +13610,7 @@
         "has_deletion": false,
         "monthly": 12,
         "star_rating": 4.9,
-        "yesterday_reviews": 1
+        "yesterday_reviews": 6
       },
       "16": {
         "total_snap": 383,
@@ -13619,7 +13619,7 @@
         "has_deletion": false,
         "monthly": 36,
         "star_rating": 4.9,
-        "yesterday_reviews": 0
+        "yesterday_reviews": 10
       },
       "17": {
         "total_snap": 781,
@@ -13628,7 +13628,7 @@
         "has_deletion": false,
         "monthly": 35,
         "star_rating": 4.9,
-        "yesterday_reviews": 7
+        "yesterday_reviews": 10
       },
       "18": {
         "total_snap": 2561,
@@ -13646,7 +13646,7 @@
         "has_deletion": false,
         "monthly": 95,
         "star_rating": 4.8,
-        "yesterday_reviews": 9
+        "yesterday_reviews": 10
       },
       "20": {
         "total_snap": 1181,
@@ -13655,7 +13655,7 @@
         "has_deletion": false,
         "monthly": 49,
         "star_rating": 4.9,
-        "yesterday_reviews": 0
+        "yesterday_reviews": 10
       },
       "21": {
         "total_snap": 678,
@@ -13664,7 +13664,7 @@
         "has_deletion": false,
         "monthly": 23,
         "star_rating": 4.9,
-        "yesterday_reviews": 5
+        "yesterday_reviews": 10
       },
       "22": {
         "total_snap": 641,
@@ -13673,7 +13673,7 @@
         "has_deletion": false,
         "monthly": 27,
         "star_rating": 4.8,
-        "yesterday_reviews": 3
+        "yesterday_reviews": 10
       },
       "23": {
         "total_snap": 992,
@@ -13682,7 +13682,7 @@
         "has_deletion": false,
         "monthly": 21,
         "star_rating": 4.8,
-        "yesterday_reviews": 0
+        "yesterday_reviews": 10
       },
       "24": {
         "total_snap": 1040,
@@ -13691,7 +13691,7 @@
         "has_deletion": false,
         "monthly": 28,
         "star_rating": 4.9,
-        "yesterday_reviews": 2
+        "yesterday_reviews": 10
       },
       "25": {
         "total_snap": 1018,
@@ -13709,7 +13709,7 @@
         "has_deletion": false,
         "monthly": 61,
         "star_rating": 4.9,
-        "yesterday_reviews": 6
+        "yesterday_reviews": 10
       },
       "27": {
         "total_snap": 4005,
@@ -13727,7 +13727,7 @@
         "has_deletion": false,
         "monthly": 40,
         "star_rating": 4.9,
-        "yesterday_reviews": 6
+        "yesterday_reviews": 10
       },
       "29": {
         "total_snap": 1034,
@@ -13736,7 +13736,7 @@
         "has_deletion": false,
         "monthly": 21,
         "star_rating": 4.9,
-        "yesterday_reviews": 5
+        "yesterday_reviews": 10
       },
       "30": {
         "total_snap": 739,
@@ -13745,7 +13745,7 @@
         "has_deletion": false,
         "monthly": 30,
         "star_rating": 5.0,
-        "yesterday_reviews": 8
+        "yesterday_reviews": 10
       },
       "31": {
         "total_snap": 2141,
@@ -13763,7 +13763,7 @@
         "has_deletion": false,
         "monthly": 20,
         "star_rating": 4.8,
-        "yesterday_reviews": 1
+        "yesterday_reviews": 10
       },
       "33": {
         "total_snap": 1745,
@@ -13781,7 +13781,7 @@
         "has_deletion": false,
         "monthly": 30,
         "star_rating": 4.8,
-        "yesterday_reviews": 5
+        "yesterday_reviews": 10
       },
       "35": {
         "total_snap": 997,
@@ -13799,11 +13799,22 @@
         "has_deletion": false,
         "monthly": 22,
         "star_rating": 4.8,
-        "yesterday_reviews": 6
+        "yesterday_reviews": 10
       }
     }
   },
   "logs": [
+    {
+      "ran_at": "2026-07-13T02:41:11.443442+00:00",
+      "snap_date": "2026-07-13",
+      "baseline_date": "2026-07-11",
+      "success": 35,
+      "failed": 1,
+      "failed_names": [
+        "Aruppukottai-2"
+      ],
+      "total_reviews": 338
+    },
     {
       "ran_at": "2026-07-13T00:17:14.858193+00:00",
       "snap_date": "2026-07-13",
@@ -14201,15 +14212,7 @@
       "success": 36,
       "failed": 0,
       "failed_names": []
-    },
-    {
-      "ran_at": "2026-06-17T21:13:22.686239",
-      "snap_date": "2026-06-17",
-      "baseline_date": "2026-06-16",
-      "success": 36,
-      "failed": 0,
-      "failed_names": []
     }
   ],
-  "last_updated": "2026-07-13T00:17:14.858193+00:00"
+  "last_updated": "2026-07-13T02:41:11.443442+00:00"
 }
