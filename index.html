@@ -608,23 +608,10 @@ async function openReviews(){
   const body=document.getElementById("reviewsBody");
   body.innerHTML='<div class="no-data"><span class="spin"></span> Loading reviews...</div>';
   try{
-    const dates=Object.keys(D?.daily||{}).sort();
-    const bMap={};BRANCHES.forEach(b=>{bMap[b.id]=b;});
-    let all=[];
-    for(const d of dates){
-      try{
-        const r=await fetch(`scraper/reviews_detail/${d}.json?t=`+Date.now());
-        if(r.ok){
-          const arr=await r.json();
-          if(Array.isArray(arr)) arr.forEach(rev=>{
-            rev._date=d;
-            if(!rev.agm&&rev.branch_id){const br=bMap[rev.branch_id];if(br)rev.agm=br.agm;}
-            all.push(rev);
-          });
-        }
-      }catch(e){}
-    }
-    rvAll=all;
+    const r=await fetch("scraper/reviews_detail/all_reviews.json?t="+Date.now());
+    if(!r.ok)throw new Error("No reviews data");
+    const all=await r.json();
+    rvAll=Array.isArray(all)?all:[];
     rvFDate="__all__";rvFBranch="__all__";rvFAgm="__all__";rvFRating=0;
     renderReviews();
   }catch(e){body.innerHTML=`<div class="no-data">${e.message}</div>`;}

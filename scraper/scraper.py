@@ -186,7 +186,7 @@ async def extract_stars(page):
 
     return stars
 
-async def extract_review_cards(page, snap_date, yesterday):
+async def extract_review_cards(page):
     reviews_found = []
     seen_ids = set()
     today_ist_dt = ist_now()
@@ -215,7 +215,6 @@ async def extract_review_cards(page, snap_date, yesterday):
 
                 parsed = parse_relative_date(dt, today_ist_dt)
                 if parsed is None: continue
-                if parsed < yesterday: continue
 
                 # Stars from individual review
                 rev_stars = 0
@@ -260,29 +259,27 @@ async def extract_review_cards(page, snap_date, yesterday):
                             rev_text = ""
                     except Exception: pass
 
-                if parsed in (yesterday, snap_date):
-                    reviews_found.append({
-                        "review_id": rid,
-                        "reviewer":  reviewer,
-                        "stars":     rev_stars,
-                        "text":      rev_text,
-                        "date_text": dt,
-                        "date":      parsed,
-                    })
+                reviews_found.append({
+                    "review_id": rid,
+                    "reviewer":  reviewer,
+                    "stars":     rev_stars,
+                    "text":      rev_text,
+                    "date_text": dt,
+                    "date":      parsed,
+                })
             except Exception: continue
 
     # Fallback: parse reviews from full page HTML if no data-review-id found
     if not reviews_found:
         try:
             html = await page.content()
-            # Look for review JSON data embedded in the page
             review_blocks = re.findall(
                 r'\["((?:[^"\\]|\\.){10,200})",\s*\[.*?\],\s*"([^"]*?(?:ago|yesterday|day|week|month|year)[^"]*?)"',
                 html, re.I
             )
             for idx, (review_text, date_text) in enumerate(review_blocks):
                 parsed = parse_relative_date(date_text, today_ist_dt)
-                if parsed and parsed >= yesterday:
+                if parsed:
                     reviews_found.append({
                         "review_id": f"html_{idx}",
                         "reviewer": "Anonymous",
@@ -295,7 +292,7 @@ async def extract_review_cards(page, snap_date, yesterday):
 
     return reviews_found
 
-async def scrape_branch(browser, branch, snap_date, yesterday):
+async def scrape_branch(browser, branch):
     url = f"https://www.google.com/maps/place/?q=place_id:{branch['place_id']}"
     result = {"total":0, "stars":0.0, "reviews":[], "error":None}
     page = None
@@ -363,7 +360,7 @@ async def scrape_branch(browser, branch, snap_date, yesterday):
                 except Exception: pass
                 await page.wait_for_timeout(1000)
 
-            reviews = await extract_review_cards(page, snap_date, yesterday)
+            reviews = await extract_review_cards(page)
             result["reviews"] = reviews
 
         await page.close()
@@ -375,7 +372,7 @@ async def scrape_branch(browser, branch, snap_date, yesterday):
         except Exception: pass
     return result
 
-async def run_all(snap_date, yesterday):
+async def run_all():
     from playwright.async_api import async_playwright
     results = {}; success = 0; failed = []
     async with async_playwright() as p:
@@ -410,11 +407,11 @@ async def run_all(snap_date, yesterday):
             async with sem:
                 bid = str(branch["id"])
                 print(f"  [{branch['id']:02}/36] {branch['name']} ...", flush=True)
-                res = await scrape_branch(browser, branch, snap_date, yesterday)
+                res = await scrape_branch(browser, branch)
                 if res["total"] == 0:
                     await asyncio.sleep(3)
                     print(f"  ↻ Retry {branch['name']} ...", flush=True)
-                    res = await scrape_branch(browser, branch, snap_date, yesterday)
+                    res = await scrape_branch(browser, branch)
                 if res["total"] == 0:
                     print(f"  ✗ {branch['name']}: err={res['error']}", flush=True)
                     failed.append(branch["name"])
@@ -426,7 +423,7 @@ async def run_all(snap_date, yesterday):
         await browser.close()
     return results, success, failed
 
-def save_results(results, success, failed, snap_date, yesterday, run_time):
+def save_results(results, success, failed, snap_date, run_time):
     data = load_data()
     prev_dates    = sorted([d for d in data.get("daily",{}) if d < snap_date], reverse=True)
     baseline_date = prev_dates[0] if prev_dates else None
@@ -458,10 +455,10 @@ def save_results(results, success, failed, snap_date, yesterday, run_time):
     detail_dir = DATA_FILE.parent/"reviews_detail"
     detail_dir.mkdir(parents=True, exist_ok=True)
 
-    # Group reviews by their actual date and save each to correct file
+    # Group reviews by their actual parsed date and save each to correct file
     by_date = {}
     for rv in all_reviews:
-        d = rv.get("date", yesterday)
+        d = rv.get("date", snap_date)
         by_date.setdefault(d, []).append(rv)
 
     for date_key, revs in by_date.items():
@@ -475,11 +472,28 @@ def save_results(results, success, failed, snap_date, yesterday, run_time):
         fpath.write_text(json.dumps(merged, indent=2, ensure_ascii=False), encoding="utf-8")
         print(f"  Saved {len(merged)} reviews -> {fpath}", flush=True)
 
+    # Merge all existing review files into single all_reviews.json for fast frontend loading
+    all_reviews_file = detail_dir/"all_reviews.json"
+    all_existing = {}
+    if all_reviews_file.exists():
+        try:
+            loaded = json.loads(all_reviews_file.read_text(encoding="utf-8"))
+            if isinstance(loaded, list):
+                for rv in loaded:
+                    all_existing[rv.get("review_id","")] = rv
+            elif isinstance(loaded, dict):
+                all_existing = loaded
+        except Exception: pass
+    for rv in all_reviews:
+        all_existing[rv.get("review_id","")] = rv
+    all_reviews_file.write_text(json.dumps(list(all_existing.values()), indent=2, ensure_ascii=False), encoding="utf-8")
+    print(f"  Saved all_reviews.json — {len(all_existing)} total reviews", flush=True)
+
     data.setdefault("logs",[]).insert(0,{
-        "ran_at":run_time,"snap_date":snap_date,"yesterday":yesterday,
+        "ran_at":run_time,"snap_date":snap_date,
         "baseline_date":baseline_date,"success":success,
         "failed":len(failed),"failed_names":failed,
-        "total_yesterday_reviews":len(by_date.get(yesterday,[])),
+        "total_reviews":sum(len(v) for v in by_date.values()),
     })
     data["logs"] = data["logs"][:50]
     data["last_updated"] = run_time
@@ -489,20 +503,18 @@ def save_results(results, success, failed, snap_date, yesterday, run_time):
 async def main():
     now_ist   = ist_now()
     snap_date = now_ist.date().strftime("%Y-%m-%d")
-    yesterday = (now_ist - timedelta(days=1)).date().strftime("%Y-%m-%d")
     run_time  = datetime.now(timezone.utc).isoformat()
     print("=== Google Reviews Scraper ===")
     print(f"  Run time : {now_ist.strftime('%Y-%m-%d %H:%M IST')}")
     print(f"  Snap date: {snap_date}")
-    print(f"  Yesterday: {yesterday}")
     print()
-    results, success, failed = await run_all(snap_date, yesterday)
+    results, success, failed = await run_all()
     print(f"\n=== Results: {success}/36 ===")
     if failed: print(f"  Failed: {', '.join(failed)}")
     if success == 0:
         print("FATAL: 0 branches succeeded.")
         sys.exit(1)
-    save_results(results, success, failed, snap_date, yesterday, run_time)
+    save_results(results, success, failed, snap_date, run_time)
     print("=== Done ===")
 
 if __name__ == "__main__":
