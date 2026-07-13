@@ -13619,7 +13619,7 @@
         "has_deletion": false,
         "monthly": 36,
         "star_rating": 4.9,
-        "yesterday_reviews": 4
+        "yesterday_reviews": 0
       },
       "17": {
         "total_snap": 781,
@@ -13655,7 +13655,7 @@
         "has_deletion": false,
         "monthly": 49,
         "star_rating": 4.9,
-        "yesterday_reviews": 10
+        "yesterday_reviews": 0
       },
       "21": {
         "total_snap": 678,
@@ -13804,6 +13804,16 @@
     }
   },
   "logs": [
+    {
+      "ran_at": "2026-07-13T00:17:14.858193+00:00",
+      "snap_date": "2026-07-13",
+      "yesterday": "2026-07-12",
+      "baseline_date": "2026-07-11",
+      "success": 36,
+      "failed": 0,
+      "failed_names": [],
+      "total_yesterday_reviews": 66
+    },
     {
       "ran_at": "2026-07-12T23:24:28.345012+00:00",
       "snap_date": "2026-07-13",
@@ -14199,15 +14209,7 @@
       "success": 36,
       "failed": 0,
       "failed_names": []
-    },
-    {
-      "ran_at": "2026-06-17T20:35:34.944422",
-      "snap_date": "2026-06-17",
-      "baseline_date": "2026-06-16",
-      "success": 36,
-      "failed": 0,
-      "failed_names": []
     }
   ],
-  "last_updated": "2026-07-12T23:24:28.345012+00:00"
+  "last_updated": "2026-07-13T00:17:14.858193+00:00"
 }
