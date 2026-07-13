@@ -635,8 +635,8 @@ async function runLiveTracker(){
     // Trigger workflow_dispatch
     const triggerResp=await fetch(`https://api.github.com/repos/${GH_OWNER}/${GH_REPO}/actions/workflows/live.yml/dispatches`,{
       method:"POST",
-      headers:{"Authorization":"Bearer "+token,"Accept":"application/vnd.github+json","X-GitHub-Api-Version":"2022-11-28"},
-      ref:"main"
+      headers:{"Authorization":"Bearer "+token,"Accept":"application/vnd.github+json","X-GitHub-Api-Version":"2022-11-28","Content-Type":"application/json"},
+      body:JSON.stringify({ref:"main"})
     });
     if(!triggerResp.ok && triggerResp.status!==204){
       const err=await triggerResp.json().catch(()=>({}));
