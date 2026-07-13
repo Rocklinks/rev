@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
 """
-Live Tracker — scrolls Reviews tab, counts all [data-review-id] blocks
-loaded since 12 AM IST. Scrolls until no new reviews appear (handles 50+).
+Live Tracker — async tab-pool scraper.
+Opens a single browser context with multiple reusable tabs to scrape
+Google Maps reviews for all branches in parallel. Much faster than
+creating a new context per branch.
 """
 import asyncio, traceback, sys, json, re, shutil, glob as globmod
 from datetime import datetime, timedelta, timezone
@@ -10,7 +12,7 @@ from pathlib import Path
 IST        = timedelta(hours=5, minutes=30)
 DATA_FILE  = Path(__file__).parent / "reviews.json"
 LIVE_FILE  = Path(__file__).parent / "live_data.json"
-CONCURRENCY = 3
+TAB_POOL   = 10
 
 BRANCHES = [
     {"id":1,  "name":"Tuticorin-1",     "place_id":"ChIJ5zJNoJfvAzsR-bJE_3bbNYw", "agm":"Sivaperumal"},
@@ -55,11 +57,11 @@ def ist_now():
     return datetime.now(timezone.utc) + IST
 
 async def get_text(loc) -> str:
-    try: return (await loc.text_content(timeout=3000) or "").strip()
+    try: return (await loc.text_content(timeout=2000) or "").strip()
     except Exception: return ""
 
 async def get_attr(loc, attr) -> str:
-    try: return (await loc.get_attribute(attr, timeout=3000) or "").strip()
+    try: return (await loc.get_attribute(attr, timeout=2000) or "").strip()
     except Exception: return ""
 
 async def extract_review_count(page):
@@ -157,13 +159,11 @@ def parse_relative_date(text, today_ist):
     return None
 
 async def count_reviews_by_scroll(page, today_str):
-    """Click Reviews tab, sort newest, scroll and count all reviews from today.
-    Stops when it hits a review older than today (sorted newest first)."""
+    """Click Reviews tab, sort newest, scroll and count all reviews from today."""
     today_ist_dt = ist_now()
     seen_ids = set()
     today_count = 0
 
-    # Click Reviews tab
     try:
         tab_sel = (
             'button[aria-label*="Review" i], '
@@ -171,31 +171,28 @@ async def count_reviews_by_scroll(page, today_str):
             'a[aria-label*="Review" i]'
         )
         if await page.locator(tab_sel).count() > 0:
-            await page.locator(tab_sel).first.click(timeout=5000)
-            await page.wait_for_timeout(2000)
+            await page.locator(tab_sel).first.click(timeout=4000)
+            await page.wait_for_timeout(1500)
     except Exception: pass
 
-    # Sort newest
     try:
         sb_sel = 'button[aria-label*="Sort" i], button[aria-label*="sort" i]'
         if await page.locator(sb_sel).count() > 0:
-            await page.locator(sb_sel).first.click(timeout=5000)
-            await page.wait_for_timeout(800)
+            await page.locator(sb_sel).first.click(timeout=4000)
+            await page.wait_for_timeout(600)
             nw_sel = (
                 '[role="menuitemradio"]:has-text("Newest"), '
                 'li:has-text("Newest"), '
                 '[role="option"]:has-text("Newest")'
             )
             if await page.locator(nw_sel).count() > 0:
-                await page.locator(nw_sel).first.click(timeout=5000)
-                await page.wait_for_timeout(2000)
+                await page.locator(nw_sel).first.click(timeout=4000)
+                await page.wait_for_timeout(1500)
     except Exception: pass
 
-    # Scroll and count every review from today. Stop when we see one older than today.
     for scroll_round in range(200):
         blocks = page.locator('[data-review-id]')
         n = await blocks.count()
-
         found_older_than_today = False
 
         for i in range(n):
@@ -229,35 +226,22 @@ async def count_reviews_by_scroll(page, today_str):
         if today_count >= 50 or found_older_than_today:
             break
 
-        # Scroll down
         try:
             panel_sel = '[tabindex="-1"]'
             if await page.locator(panel_sel).count() > 0:
                 await page.locator(panel_sel).first.focus()
             await page.keyboard.press("End")
         except Exception: pass
-        await page.wait_for_timeout(1000)
+        await page.wait_for_timeout(800)
 
     return today_count
 
-async def fetch_branch(browser, branch, today_str):
-    """Fetch total count + today's review count via scroll method."""
+async def scrape_one_branch(page, branch, today_str):
+    """Navigate to a branch's Google Maps page and extract all data using a single page instance."""
     url = f"https://www.google.com/maps/place/?q=place_id:{branch['place_id']}"
-    page = None
     try:
-        ctx = await browser.new_context(
-            locale="en-IN", viewport={"width":1366,"height":768},
-            extra_http_headers={"Accept-Language":"en-IN,en;q=0.9"},
-            user_agent="Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.7103.25 Safari/537.36",
-        )
-        page = await ctx.new_page()
-        await page.route("**/*.{png,jpg,jpeg,gif,webp,svg,woff,woff2,ttf,mp4}", lambda r: r.abort())
-        try:
-            await page.goto("https://www.google.com/maps", wait_until="load", timeout=15000)
-            await page.wait_for_timeout(1000)
-        except Exception: pass
-        await page.goto(url, wait_until="load", timeout=30000)
-        await page.wait_for_timeout(5000)
+        await page.goto(url, wait_until="domcontentloaded", timeout=20000)
+        await page.wait_for_timeout(3000)
 
         total = await extract_review_count(page)
         stars = await extract_stars(page)
@@ -266,12 +250,8 @@ async def fetch_branch(browser, branch, today_str):
         if total > 0:
             today_count = await count_reviews_by_scroll(page, today_str)
 
-        await page.close(); await ctx.close()
         return total, stars, today_count
     except Exception:
-        try:
-            if page: await page.close()
-        except Exception: pass
         return 0, 0.0, 0
 
 async def run_live():
@@ -280,7 +260,6 @@ async def run_live():
     run_time = now_ist.isoformat()
     today    = now_ist.date().strftime("%Y-%m-%d")
 
-    # Get 12 AM IST baseline
     base = {}
     if DATA_FILE.exists():
         try:
@@ -304,16 +283,30 @@ async def run_live():
                    "--disable-blink-features=AutomationControlled"],
         )
         print(f"  Launched {brave}", flush=True)
-        sem = asyncio.Semaphore(CONCURRENCY)
+
+        ctx = await browser.new_context(
+            locale="en-IN", viewport={"width":1366,"height":768},
+            extra_http_headers={"Accept-Language":"en-IN,en;q=0.9"},
+            user_agent="Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.7103.25 Safari/537.36",
+        )
+        await ctx.route("**/*.{png,jpg,jpeg,gif,webp,svg,woff,woff2,ttf,mp4}", lambda r: r.abort())
+
+        pages = []
+        for _ in range(TAB_POOL):
+            pg = await ctx.new_page()
+            pages.append(pg)
+
+        sem = asyncio.Semaphore(TAB_POOL)
 
         async def fetch_one(branch):
             async with sem:
                 bid = str(branch["id"])
-                print(f"  [{branch['id']:02}/36] {branch['name']} ...", flush=True)
-                total, stars, today_count = await fetch_branch(browser, branch, today)
+                print(f"  [{branch['id']:02}/36] {branch['name']} ...", end="", flush=True)
+                pg = pages[branch["id"] % TAB_POOL]
+                total, stars, today_count = await scrape_one_branch(pg, branch, today)
                 if total == 0:
-                    await asyncio.sleep(2)
-                    total, stars, today_count = await fetch_branch(browser, branch, today)
+                    await asyncio.sleep(1)
+                    total, stars, today_count = await scrape_one_branch(pg, branch, today)
                 baseline = base.get(bid,{}).get("total_snap", 0)
                 results[bid] = {
                     "id":branch["id"],"name":branch["name"],"agm":branch["agm"],
@@ -321,10 +314,14 @@ async def run_live():
                     "today_count":today_count,
                 }
                 status = "✓" if total else "✗"
-                print(f"  {status} {branch['name']}: total={total} today={today_count}", flush=True)
-                await asyncio.sleep(0.3)
+                print(f" {status} total={total} today={today_count}", flush=True)
 
         await asyncio.gather(*[fetch_one(b) for b in BRANCHES])
+
+        for pg in pages:
+            try: await pg.close()
+            except Exception: pass
+        await ctx.close()
         await browser.close()
 
     agm_summary = {}
