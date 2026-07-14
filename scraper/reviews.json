@@ -13804,18 +13804,18 @@
     },
     "2026-07-13": {
       "1": {
-        "total_snap": 7252,
-        "daily_count": 20,
-        "raw_delta": 20,
+        "total_snap": 7254,
+        "daily_count": 22,
+        "raw_delta": 22,
         "has_deletion": false,
         "monthly": 319,
         "star_rating": 4.9,
         "yesterday_reviews": 10
       },
       "2": {
-        "total_snap": 6488,
-        "daily_count": 5,
-        "raw_delta": 5,
+        "total_snap": 6489,
+        "daily_count": 6,
+        "raw_delta": 6,
         "has_deletion": false,
         "monthly": 101,
         "star_rating": 4.8,
@@ -13858,9 +13858,9 @@
         "yesterday_reviews": 10
       },
       "7": {
-        "total_snap": 4344,
-        "daily_count": 11,
-        "raw_delta": 11,
+        "total_snap": 4345,
+        "daily_count": 12,
+        "raw_delta": 12,
         "has_deletion": false,
         "monthly": 134,
         "star_rating": 4.8,
