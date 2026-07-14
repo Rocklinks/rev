@@ -609,17 +609,21 @@ async function openLive(){
 
 function renderLiveData(ld){
   const body=document.getElementById("liveBody");
-  const runTime=new Date(ld.run_time).toLocaleString("en-IN",{timeZone:"Asia/Kolkata"});
+  const runTime=ld.run_time?new Date(ld.run_time).toLocaleString("en-IN",{timeZone:"Asia/Kolkata"}):"Never";
+  const todayLabel=ld.today||"—";
   let html=`<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;padding-bottom:12px;border-bottom:1px solid #e2e8f0">
-    <p style="color:var(--muted);font-size:12px">Last scraped: ${runTime}</p>
-    <button onclick="runLiveTracker()" id="liveRunBtn" style="padding:8px 16px;border-radius:8px;border:none;background:#6366f1;color:#fff;font-size:12px;font-weight:600;cursor:pointer">\u25B6 Run Now</button>
+    <div>
+      <p style="color:var(--muted);font-size:12px">Last scraped: ${runTime}</p>
+      <p style="color:var(--text);font-size:13px;font-weight:600;margin-top:4px">Date: ${todayLabel}</p>
+    </div>
+    <button onclick="runLiveTracker()" id="liveRunBtn" style="padding:8px 16px;border-radius:8px;border:none;background:#6366f1;color:#fff;font-size:12px;font-weight:600;cursor:pointer">&#9654; Run Now</button>
   </div>`;
   const groups=activeAgm?{[activeAgm]:ld.agm_summary?.[activeAgm]}:ld.agm_summary||{};
   Object.entries(groups).forEach(([agm,g])=>{
     if(!g)return;
     html+=`<div class="agm-section-head"><h3>&#x1F464; ${agm}</h3><span class="badge b-green">+${g.total_today} new</span></div>`;
     (g.branches||[]).forEach(b=>{
-      html+=`<div class="live-card"><div><div class="live-name">${b.name}</div><div class="live-agm">Total: ${(b.total||0).toLocaleString()} &middot; Baseline: ${(b.baseline||0).toLocaleString()}</div></div><div style="text-align:right"><div class="live-new">+${b.live_new||0}</div><div class="live-sub">since 12 AM</div></div></div>`;
+      html+=`<div class="live-card"><div><div class="live-name">${b.name}</div><div class="live-agm">Total: ${(b.total||0).toLocaleString()} &middot; Baseline: ${(b.baseline||0).toLocaleString()}</div></div><div style="text-align:right"><div class="live-new">+${b.today_count||0}</div><div class="live-sub">since 12 AM</div></div></div>`;
     });
   });
   if(!html.includes("agm-section-head")) html+='<div class="no-data">No data available.</div>';
