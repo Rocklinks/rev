@@ -213,7 +213,7 @@ tbody td{padding:11px 14px;white-space:nowrap}
   </div>
   <div class="topbar-right">
     <button class="btn btn-red" onclick="openLive()">&#128308; Live</button>
-    <button class="btn btn-green" onclick="openReviews()">&#128269; Reviews</button>
+    <button class="btn btn-green" id="reviewsBtn" onclick="openReviews()">&#128269; Reviews</button>
     <button class="btn btn-export" onclick="openModal()">&#x2B07; Export</button>
     <span id="clock"></span>
   </div>
@@ -300,6 +300,12 @@ async function init(){
     D=await r.json();
     const dates=Object.keys(D.daily||{}).sort();
     if(dates.length) selDate=dates[dates.length-1];
+    // Update Reviews button with scraped date
+    if(selDate){
+      const d=new Date(selDate+"T12:00:00");
+      const label=d.toLocaleDateString("en-IN",{timeZone:"Asia/Kolkata",day:"numeric",month:"short"});
+      document.getElementById("reviewsBtn").innerHTML="&#128269; Reviews — "+label;
+    }
     showView("dashboard",document.querySelector(".s-item"));
   }catch(e){
     document.getElementById("mainContent").innerHTML='<div class="no-data">No data yet. Run the scraper first.</div>';
