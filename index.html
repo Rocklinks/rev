@@ -213,7 +213,6 @@ tbody td{padding:11px 14px;white-space:nowrap}
   </div>
   <div class="topbar-right">
     <button class="btn btn-red" onclick="openLive()">&#128308; Live</button>
-    <button class="btn btn-green" id="reviewsBtn" onclick="openReviews()">&#128269; Reviews</button>
     <button class="btn btn-export" onclick="openModal()">&#x2B07; Export</button>
     <span id="clock"></span>
   </div>
@@ -227,6 +226,10 @@ tbody td{padding:11px 14px;white-space:nowrap}
       <div class="s-item active" onclick="showView('dashboard',this)"><span class="s-icon">&#x1F4CA;</span>Dashboard</div>
       <div class="s-item" onclick="showView('branches',this)"><span class="s-icon">&#x1F3E2;</span>All Branches<span class="s-count" id="sCountBranches"></span></div>
       <div class="s-item" onclick="showView('agm',this)"><span class="s-icon">&#x1F464;</span>By AGM<span class="s-count" id="sCountAgm"></span></div>
+    </div>
+    <div class="s-group">
+      <div class="s-label">Tools</div>
+      <div class="s-item" onclick="openReviews()"><span class="s-icon">&#128269;</span>Reviews</div>
     </div>
     <div class="s-group">
       <div class="s-label">Filter by AGM</div>
@@ -307,12 +310,6 @@ async function init(){
     D=await r.json();
     const dates=Object.keys(D.daily||{}).sort();
     if(dates.length) selDate=dates[dates.length-1];
-    // Update Reviews button with scraped date
-    if(selDate){
-      const d=new Date(selDate+"T12:00:00");
-      const label=d.toLocaleDateString("en-IN",{timeZone:"Asia/Kolkata",day:"numeric",month:"short"});
-      document.getElementById("reviewsBtn").innerHTML="&#128269; Reviews — "+label;
-    }
     showView("dashboard",document.querySelector(".s-item"));
   }catch(e){
     document.getElementById("mainContent").innerHTML='<div class="no-data">No data yet. Run the scraper first.</div>';
@@ -599,33 +596,149 @@ function closePanel(id){document.getElementById(id).classList.remove("open")}
 
 
 
+const GH_OWNER="Rocklinks", GH_REPO="rev";
+function getGhToken(){return localStorage.getItem("gh_pat")||""}
+function setGhToken(t){localStorage.setItem("gh_pat",t)}
+
 async function openLive(){
   currentView="live";
   document.querySelectorAll(".s-item").forEach(x=>x.classList.remove("active"));
   const mc=document.getElementById("mainContent");
-  const filtered=getFiltered();
-  let html=`<div class="section">
+
+  let liveHtml=`<div class="section">
     <div class="section-hdr">
-      <div class="section-title">&#128308; Live Tracker &mdash; Google Maps Embeds</div>
+      <div class="section-title">&#128308; Live Scraper &mdash; Google Reviews</div>
       <div class="ctrls">
-        <div class="chip-row">${AGMS.map(a=>`<div class="chip${activeAgm===a?" selected":""}" onclick="filterAgm('${a}',document.getElementById('agmSb_${a}'))">${a}</div>`).join("")}</div>
+        <button class="btn btn-red" id="liveRunBtn" onclick="runLiveScraper()">&#9654; Run Scraper</button>
       </div>
     </div>
-    <div style="padding:16px;display:grid;grid-template-columns:repeat(auto-fill,minmax(400px,1fr));gap:16px">`;
-  filtered.forEach(b=>{
-    const directUrl=`https://www.google.com/maps/place/?q=place_id:${b.place_id}`;
-    html+=`<div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden;box-shadow:var(--shadow)">
-      <div style="padding:12px 14px;display:flex;align-items:center;justify-content:space-between">
-        <div>
-          <div style="font-weight:700;font-size:13px;color:var(--text)">${b.name}</div>
-          <div style="font-size:11px;color:var(--muted)">${b.agm}</div>
-        </div>
-        <a href="${directUrl}" target="_blank" style="padding:6px 12px;border-radius:8px;background:var(--indigo);color:#fff;text-decoration:none;font-size:11px;font-weight:600">Open in Maps &#8599;</a>
+    <div id="liveScraperBody" style="padding:20px">
+      <div style="text-align:center;padding:30px;color:var(--muted)">
+        <p style="font-size:14px;margin-bottom:8px">Click <strong>Run Scraper</strong> to scrape today's Google Reviews for all 36 branches.</p>
+        <p style="font-size:12px">Uses scroll method to count new reviews since 12 AM IST.</p>
       </div>
+    </div>
+  </div>`;
+  mc.innerHTML=liveHtml;
+}
+
+async function runLiveScraper(){
+  let token=getGhToken();
+  if(!token){
+    token=prompt("Enter your GitHub PAT (with repo + actions:write scopes):");
+    if(!token)return;
+    setGhToken(token.trim());
+  }
+  const btn=document.getElementById("liveRunBtn");
+  const body=document.getElementById("liveScraperBody");
+  btn.disabled=true; btn.innerHTML='<span class="spin"></span> Starting...';
+
+  try{
+    const triggerResp=await fetch(`https://api.github.com/repos/${GH_OWNER}/${GH_REPO}/actions/workflows/live.yml/dispatches`,{
+      method:"POST",
+      headers:{"Authorization":"Bearer "+token,"Accept":"application/vnd.github+json","X-GitHub-Api-Version":"2022-11-28","Content-Type":"application/json"},
+      body:JSON.stringify({ref:"main"})
+    });
+    if(!triggerResp.ok && triggerResp.status!==204){
+      const err=await triggerResp.json().catch(()=>({}));
+      if(triggerResp.status===401||triggerResp.status===403){
+        setGhToken("");
+        throw new Error("Invalid token. Please try again.");
+      }
+      throw new Error(err.message||"Failed to trigger workflow ("+triggerResp.status+")");
+    }
+
+    body.innerHTML=`<div style="text-align:center;padding:20px">
+      <span class="spin" style="width:20px;height:20px;border-width:3px"></span>
+      <p style="margin-top:12px;color:var(--text);font-size:13px;font-weight:600">Workflow triggered. Waiting for run to appear...</p>
+      <p id="liveProgress" style="margin-top:6px;color:var(--muted);font-size:12px">Checking...</p>
     </div>`;
+
+    await new Promise(r=>setTimeout(r,3000));
+    let runId=null, attempts=0;
+    while(attempts<30 && !runId){
+      const runsResp=await fetch(`https://api.github.com/repos/${GH_OWNER}/${GH_REPO}/actions/workflows/live.yml/runs?per_page=1`,{
+        headers:{"Authorization":"Bearer "+token,"Accept":"application/vnd.github+json","X-GitHub-Api-Version":"2022-11-28"}
+      });
+      const runsData=await runsResp.json();
+      const latest=runsData.workflow_runs?.[0];
+      if(latest && latest.created_at > new Date(Date.now()-120000).toISOString()){
+        runId=latest.id;
+      }else{
+        attempts++;
+        document.getElementById("liveProgress").textContent=`Searching for workflow run... (${attempts})`;
+        await new Promise(r=>setTimeout(r,2000));
+      }
+    }
+    if(!runId) throw new Error("Could not detect workflow run. Check the Actions tab on GitHub.");
+
+    let status="queued", elapsed=0;
+    while(status!=="completed" && elapsed<300){
+      await new Promise(r=>setTimeout(r,5000));
+      elapsed+=5;
+      const stResp=await fetch(`https://api.github.com/repos/${GH_OWNER}/${GH_REPO}/actions/runs/${runId}`,{
+        headers:{"Authorization":"Bearer "+token,"Accept":"application/vnd.github+json","X-GitHub-Api-Version":"2022-11-28"}
+      });
+      const stData=await stResp.json();
+      status=stData.status||"unknown";
+      const concl=stData.conclusion||"";
+      document.getElementById("liveProgress").textContent=`Status: ${status}${concl?" ("+concl+")":""} \u00B7 ${elapsed}s elapsed`;
+      if(status==="completed"){
+        if(concl!=="success") throw new Error("Workflow finished with status: "+concl);
+        break;
+      }
+    }
+    if(status!=="completed") throw new Error("Workflow timed out after 5 minutes.");
+
+    document.getElementById("liveProgress").textContent="Workflow done. Loading results...";
+    await new Promise(r=>setTimeout(r,2000));
+    const fresh=await fetch("scraper/live_data.json?t="+Date.now());
+    if(!fresh.ok) throw new Error("Could not load live_data.json");
+    const ld=await fresh.json();
+    renderLiveResults(ld);
+  }catch(e){
+    body.innerHTML=`<div style="text-align:center;padding:30px">
+      <p style="color:var(--rose);font-size:14px;font-weight:600;margin-bottom:8px">${e.message}</p>
+      <button onclick="runLiveScraper()" style="padding:8px 16px;border-radius:8px;border:1px solid var(--border);background:var(--surface);color:var(--text);font-size:12px;cursor:pointer">Retry</button>
+    </div>`;
+  }
+  btn.disabled=false; btn.innerHTML='&#9654; Run Scraper';
+}
+
+function renderLiveResults(ld){
+  const body=document.getElementById("liveScraperBody");
+  const runTime=ld.run_time?new Date(ld.run_time).toLocaleString("en-IN",{timeZone:"Asia/Kolkata"}):"Never";
+  const todayLabel=ld.today||"—";
+
+  let html=`<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;padding-bottom:12px;border-bottom:1px solid var(--border)">
+    <div>
+      <p style="color:var(--muted);font-size:12px">Last scraped: ${runTime}</p>
+      <p style="color:var(--text);font-size:13px;font-weight:600;margin-top:4px">Date: ${todayLabel}</p>
+    </div>
+  </div>`;
+
+  const groups=activeAgm?{[activeAgm]:ld.agm_summary?.[activeAgm]}:ld.agm_summary||{};
+  Object.entries(groups).forEach(([agm,g])=>{
+    if(!g)return;
+    html+=`<div class="agm-section-head"><h3>&#x1F464; ${agm}</h3><span class="badge b-green">+${g.total_today} new</span></div>`;
+    html+=`<div class="tbl-wrap"><table><thead><tr><th>Branch</th><th>Total</th><th>Baseline</th><th>Today</th><th></th></tr></thead><tbody>`;
+    (g.branches||[]).forEach(b=>{
+      const diff=(b.total||0)-(b.baseline||0);
+      const diffBadge=diff>0?`<span class="badge b-green">+${diff}</span>`:diff<0?`<span class="badge" style="background:rgba(225,29,72,.1);color:var(--rose)">${diff}</span>`:'<span class="badge b-gray">0</span>';
+      const mapsUrl=`https://www.google.com/maps/place/?q=place_id:${BRANCHES.find(x=>x.id===b.id)?.place_id||""}`;
+      html+=`<tr>
+        <td class="td-b">${b.name}</td>
+        <td><strong>${(b.total||0).toLocaleString()}</strong></td>
+        <td style="color:var(--muted)">${(b.baseline||0).toLocaleString()}</td>
+        <td><strong style="color:var(--green)">+${b.today_count||0}</strong></td>
+        <td>${diffBadge}</td>
+        <td><a href="${mapsUrl}" target="_blank" style="font-size:11px;color:var(--indigo);text-decoration:none">Maps &#8599;</a></td>
+      </tr>`;
+    });
+    html+=`</tbody></table></div>`;
   });
-  html+=`</div></div>`;
-  mc.innerHTML=html;
+  if(!html.includes("agm-section-head")) html+='<div class="no-data">No data available.</div>';
+  body.innerHTML=html;
 }
 
 // ── REVIEWS PANEL ────────────────────────────────────────────
