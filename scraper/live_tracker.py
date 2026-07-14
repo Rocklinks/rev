@@ -258,7 +258,7 @@ async def run_live():
     from playwright.async_api import async_playwright
     now_ist  = ist_now()
     run_time = now_ist.isoformat()
-    today    = now_ist.date().strftime("%Y-%m-%d")
+    today    = (now_ist - timedelta(days=1)).date().strftime("%Y-%m-%d")
 
     base = {}
     if DATA_FILE.exists():

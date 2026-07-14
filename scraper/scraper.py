@@ -311,9 +311,87 @@ async def extract_review_cards(page):
 
     return reviews_found
 
-async def scrape_branch(browser, branch):
+async def count_reviews_by_scroll(page, today_str):
+    """Click Reviews tab, sort newest, scroll and count all reviews from today."""
+    today_ist_dt = ist_now()
+    seen_ids = set()
+    today_count = 0
+
+    try:
+        tab_sel = (
+            'button[aria-label*="Review" i], '
+            'button:has-text("Reviews"), '
+            'a[aria-label*="Review" i]'
+        )
+        if await page.locator(tab_sel).count() > 0:
+            await page.locator(tab_sel).first.click(timeout=4000)
+            await page.wait_for_timeout(1500)
+    except Exception: pass
+
+    try:
+        sb_sel = 'button[aria-label*="Sort" i], button[aria-label*="sort" i]'
+        if await page.locator(sb_sel).count() > 0:
+            await page.locator(sb_sel).first.click(timeout=4000)
+            await page.wait_for_timeout(600)
+            nw_sel = (
+                '[role="menuitemradio"]:has-text("Newest"), '
+                'li:has-text("Newest"), '
+                '[role="option"]:has-text("Newest")'
+            )
+            if await page.locator(nw_sel).count() > 0:
+                await page.locator(nw_sel).first.click(timeout=4000)
+                await page.wait_for_timeout(1500)
+    except Exception: pass
+
+    for scroll_round in range(200):
+        blocks = page.locator('[data-review-id]')
+        n = await blocks.count()
+        found_older_than_today = False
+
+        for i in range(n):
+            try:
+                blk = blocks.nth(i)
+                rid = await get_attr(blk, "data-review-id")
+                if not rid or rid in seen_ids: continue
+                seen_ids.add(rid)
+
+                dt = ""
+                spans = blk.locator("span")
+                sc = await spans.count()
+                for j in range(min(sc, 30)):
+                    t = await get_text(spans.nth(j))
+                    if re.search(r"ago|yesterday|day|week|month|year|edited", t, re.I) and len(t) < 40:
+                        dt = t; break
+                if not dt: continue
+
+                parsed = parse_relative_date(dt, today_ist_dt)
+                if parsed is None: continue
+
+                if parsed == today_str:
+                    today_count += 1
+                    if today_count >= 50:
+                        break
+                elif parsed < today_str:
+                    found_older_than_today = True
+                    break
+            except Exception: continue
+
+        if today_count >= 50 or found_older_than_today:
+            break
+
+        try:
+            panel_sel = '[tabindex="-1"]'
+            if await page.locator(panel_sel).count() > 0:
+                await page.locator(panel_sel).first.focus()
+            await page.keyboard.press("End")
+        except Exception: pass
+        await page.wait_for_timeout(800)
+
+    return today_count
+
+async def scrape_branch(browser, branch, today_str):
     url = f"https://www.google.com/maps/place/?q=place_id:{branch['place_id']}"
-    result = {"total":0, "stars":0.0, "reviews":[], "error":None}
+    result = {"total":0, "stars":0.0, "reviews":[], "today_count":0, "error":None}
     page = None
     try:
         ctx = await browser.new_context(
@@ -338,52 +416,18 @@ async def scrape_branch(browser, branch):
         result["stars"] = stars
 
         if total > 0:
-            # Click Reviews tab
-            try:
-                tab_sel = (
-                    'button[aria-label*="Review" i], '
-                    'button:has-text("Reviews"), '
-                    'a[aria-label*="Review" i]'
-                )
-                if await page.locator(tab_sel).count() > 0:
-                    await page.locator(tab_sel).first.click(timeout=5000)
-                    await page.wait_for_timeout(2000)
-            except Exception: pass
+            today_count = await count_reviews_by_scroll(page, today_str)
+        result["today_count"] = today_count
 
-            # Sort newest
+        if total > 0:
+            # Extract review cards (Reviews tab already opened and sorted by count_reviews_by_scroll)
             try:
-                sb_sel = (
-                    'button[aria-label*="Sort" i], '
-                    'button[aria-label*="sort" i]'
-                )
-                if await page.locator(sb_sel).count() > 0:
-                    await page.locator(sb_sel).first.click(timeout=5000)
-                    await page.wait_for_timeout(800)
-                    nw_sel = (
-                        '[role="menuitemradio"]:has-text("Newest"), '
-                        'li:has-text("Newest"), '
-                        '[role="option"]:has-text("Newest")'
-                    )
-                    if await page.locator(nw_sel).count() > 0:
-                        await page.locator(nw_sel).first.click(timeout=5000)
-                        await page.wait_for_timeout(2000)
-            except Exception: pass
-
-            # Scroll down to load more reviews (stop at 50)
-            for _ in range(30):
-                try:
-                    panel_sel = '[tabindex="-1"]'
-                    if await page.locator(panel_sel).count() > 0:
-                        await page.locator(panel_sel).first.focus()
-                    await page.keyboard.press("End")
-                except Exception: pass
+                panel_sel = '[tabindex="-1"]'
+                if await page.locator(panel_sel).count() > 0:
+                    await page.locator(panel_sel).first.focus()
+                await page.keyboard.press("Home")
                 await page.wait_for_timeout(1000)
-                # Stop if we have enough reviews
-                try:
-                    rev_count = await page.locator('[data-review-id]').count()
-                    if rev_count >= 50:
-                        break
-                except Exception: pass
+            except Exception: pass
 
             reviews = await extract_review_cards(page)
             result["reviews"] = reviews
@@ -397,7 +441,7 @@ async def scrape_branch(browser, branch):
         except Exception: pass
     return result
 
-async def run_all():
+async def run_all(today_str):
     from playwright.async_api import async_playwright
     results = {}; success = 0; failed = []
     async with async_playwright() as p:
@@ -432,11 +476,11 @@ async def run_all():
             async with sem:
                 bid = str(branch["id"])
                 print(f"  [{branch['id']:02}/36] {branch['name']} ...", flush=True)
-                res = await scrape_branch(browser, branch)
+                res = await scrape_branch(browser, branch, today_str)
                 if res["total"] == 0:
                     await asyncio.sleep(3)
                     print(f"  ↻ Retry {branch['name']} ...", flush=True)
-                    res = await scrape_branch(browser, branch)
+                    res = await scrape_branch(browser, branch, today_str)
                 if res["total"] == 0:
                     print(f"  ✗ {branch['name']}: err={res['error']}", flush=True)
                     failed.append(branch["name"])
@@ -464,9 +508,10 @@ def save_results(results, success, failed, snap_date, run_time):
         r = results[bid]
         prev_total = baseline_snap.get(bid,{}).get("total_snap", data.get("branches",{}).get(bid,{}).get("overall",0))
         raw_delta  = r["total"] - prev_total
-        monthly    = monthly_snap.get(bid,{}).get("monthly",0) + max(raw_delta,0)
+        daily_count = r.get("today_count", 0)
+        monthly    = monthly_snap.get(bid,{}).get("monthly",0) + daily_count
         data["daily"][snap_date][bid] = {
-            "total_snap":r["total"], "daily_count":max(raw_delta,0),
+            "total_snap":r["total"], "daily_count":daily_count,
             "raw_delta":raw_delta, "has_deletion":raw_delta<0,
             "monthly":monthly, "star_rating":r["stars"],
             "yesterday_reviews":len(r["reviews"]),
@@ -532,13 +577,14 @@ def save_results(results, success, failed, snap_date, run_time):
 
 async def main():
     now_ist   = ist_now()
-    snap_date = now_ist.date().strftime("%Y-%m-%d")
+    snap_date = (now_ist - timedelta(days=1)).date().strftime("%Y-%m-%d")
+    today_str = snap_date
     run_time  = datetime.now(timezone.utc).isoformat()
     print("=== Google Reviews Scraper ===")
     print(f"  Run time : {now_ist.strftime('%Y-%m-%d %H:%M IST')}")
     print(f"  Snap date: {snap_date}")
     print()
-    results, success, failed = await run_all()
+    results, success, failed = await run_all(today_str)
     print(f"\n=== Results: {success}/36 ===")
     if failed: print(f"  Failed: {', '.join(failed)}")
     if success == 0:
