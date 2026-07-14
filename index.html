@@ -240,17 +240,6 @@ tbody td{padding:11px 14px;white-space:nowrap}
   </div>
 </div>
 
-<!-- Live Panel -->
-<div class="overlay" id="liveOverlay" onclick="if(event.target===this)closePanel('liveOverlay')">
-  <div class="panel">
-    <div class="panel-head">
-      <h2>&#128308; Live Tracker &mdash; Reviews Since 12 AM</h2>
-      <button class="panel-close" onclick="closePanel('liveOverlay')">&#10005;</button>
-    </div>
-    <div class="panel-body" id="liveBody"><div class="no-data">Loading...</div></div>
-  </div>
-</div>
-
 <!-- Reviews Panel -->
 <div class="overlay" id="reviewsOverlay" onclick="if(event.target===this)closePanel('reviewsOverlay')">
   <div class="panel">
@@ -265,24 +254,42 @@ tbody td{padding:11px 14px;white-space:nowrap}
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script>
 const BRANCHES=[
-  {id:1,name:"Tuticorin-1",agm:"Sivaperumal"},{id:2,name:"Tuticorin-2",agm:"Sivaperumal"},
-  {id:3,name:"Thiruchendur-1",agm:"Sivaperumal"},{id:4,name:"Thisayanvilai-1",agm:"Sivaperumal"},
-  {id:5,name:"Eral-2",agm:"Sivaperumal"},{id:6,name:"Udankudi",agm:"Sivaperumal"},
-  {id:7,name:"Tirunelveli-1",agm:"Johnson"},{id:8,name:"Valliyur-1",agm:"Johnson"},
-  {id:9,name:"Ambasamudram-1",agm:"Johnson"},{id:10,name:"Anjugramam-1",agm:"Johnson"},
-  {id:11,name:"Nagercoil",agm:"Jeeva"},{id:12,name:"Marthandam",agm:"Jeeva"},
-  {id:13,name:"Thuckalay-1",agm:"Jeeva"},{id:14,name:"Colachel-1",agm:"Jeeva"},
-  {id:15,name:"Kulasekharam-1",agm:"Jeeva"},{id:16,name:"Monday Market",agm:"Jeeva"},
-  {id:17,name:"Karungal-1",agm:"Jeeva"},{id:18,name:"Kovilpatti",agm:"Seenivasan"},
-  {id:19,name:"Ramnad",agm:"Seenivasan"},{id:20,name:"Paramakudi",agm:"Seenivasan"},
-  {id:21,name:"Sayalkudi-1",agm:"Seenivasan"},{id:22,name:"Villathikullam",agm:"Seenivasan"},
-  {id:23,name:"Sattur-2",agm:"Seenivasan"},{id:24,name:"Sankarankovil-1",agm:"Seenivasan"},
-  {id:25,name:"Kayathar-1",agm:"Seenivasan"},{id:26,name:"Thenkasi",agm:"Muthuselvam"},
-  {id:27,name:"Thenkasi-2",agm:"Muthuselvam"},{id:28,name:"Surandai-1",agm:"Muthuselvam"},
-  {id:29,name:"Puliyankudi-1",agm:"Muthuselvam"},{id:30,name:"Sengottai-1",agm:"Muthuselvam"},
-  {id:31,name:"Rajapalayam",agm:"Muthuselvam"},{id:32,name:"Virudhunagar",agm:"Venkadesan"},
-  {id:33,name:"Virudhunagar-2",agm:"Venkadesan"},{id:34,name:"Aruppukottai",agm:"Venkadesan"},
-  {id:35,name:"Aruppukottai-2",agm:"Venkadesan"},{id:36,name:"Sivakasi",agm:"Venkadesan"},
+  {id:1,name:"Tuticorin-1",agm:"Sivaperumal",place_id:"ChIJ5zJNoJfvAzsR-bJE_3bbNYw"},
+  {id:2,name:"Tuticorin-2",agm:"Sivaperumal",place_id:"ChIJH6gY4-PvAzsRJ50skTlx3cs"},
+  {id:3,name:"Thiruchendur-1",agm:"Sivaperumal",place_id:"ChIJeXA4vJKRAzsRBovAtv6lMuQ"},
+  {id:4,name:"Thisayanvilai-1",agm:"Sivaperumal",place_id:"ChIJVWkvdfh_BDsRdvtimKCLS5Y"},
+  {id:5,name:"Eral-2",agm:"Sivaperumal",place_id:"ChIJbwAA0KGMAzsRkQilW5PceeA"},
+  {id:6,name:"Udankudi",agm:"Sivaperumal",place_id:"ChIJPQAAACyEAzsRgjznQ1GLom0"},
+  {id:7,name:"Tirunelveli-1",agm:"Johnson",place_id:"ChIJ2RU2NvQRBDsRq-Fw7IVwx7k"},
+  {id:8,name:"Valliyur-1",agm:"Johnson",place_id:"ChIJcVNk6TtnBDsRBoP4zpExt5k"},
+  {id:9,name:"Ambasamudram-1",agm:"Johnson",place_id:"ChIJ9SGeIi85BDsRZk4QdyW9BSY"},
+  {id:10,name:"Anjugramam-1",agm:"Johnson",place_id:"ChIJ4yeJebLtBDsRDceoxujdGyc"},
+  {id:11,name:"Nagercoil",agm:"Jeeva",place_id:"ChIJe1LZBiTxBDsRJFLjlbgZoIs"},
+  {id:12,name:"Marthandam",agm:"Jeeva",place_id:"ChIJcWptCRdVBDsRlJh2q0-rnfY"},
+  {id:13,name:"Thuckalay-1",agm:"Jeeva",place_id:"ChIJc9QgEub4BDsRoyDR4Wd6tYA"},
+  {id:14,name:"Colachel-1",agm:"Jeeva",place_id:"ChIJgRkBLw39BDsR58D0lwNo5Ts"},
+  {id:15,name:"Kulasekharam-1",agm:"Jeeva",place_id:"ChIJw0Ep-kNXBDsRe5ad32jAeAk"},
+  {id:16,name:"Monday Market",agm:"Jeeva",place_id:"ChIJTceRGAD5BDsR65i3YNTcYHk"},
+  {id:17,name:"Karungal-1",agm:"Jeeva",place_id:"ChIJfTP5ASr_BDsRgsBaeQltkw4"},
+  {id:18,name:"Kovilpatti",agm:"Seenivasan",place_id:"ChIJHY0o-26yBjsRt7wbXB1pDUE"},
+  {id:19,name:"Ramnad",agm:"Seenivasan",place_id:"ChIJNVVVVaGiATsRnunSgOTvbE8"},
+  {id:20,name:"Paramakudi",agm:"Seenivasan",place_id:"ChIJ-dgjBzQHATsRf27FWAJgmsA"},
+  {id:21,name:"Sayalkudi-1",agm:"Seenivasan",place_id:"ChIJRTqudn9lATsR2fYyMmxlOrw"},
+  {id:22,name:"Villathikullam",agm:"Seenivasan",place_id:"ChIJi_wAkwVbATsRtFl3_V5rGrY"},
+  {id:23,name:"Sattur-2",agm:"Seenivasan",place_id:"ChIJNVVVVcHKBjsR7xMX97RFn8Q"},
+  {id:24,name:"Sankarankovil-1",agm:"Seenivasan",place_id:"ChIJE1mKnhSXBjsRKMQ-9JKQf_c"},
+  {id:25,name:"Kayathar-1",agm:"Seenivasan",place_id:"ChIJx5ebtUgRBDsRMquPZNUJVpw"},
+  {id:26,name:"Thenkasi",agm:"Muthuselvam",place_id:"ChIJuaqqquEpBDsRVITw0MMYklc"},
+  {id:27,name:"Thenkasi-2",agm:"Muthuselvam",place_id:"ChIJiwqLye6DBjsRo9v1mWXaycI"},
+  {id:28,name:"Surandai-1",agm:"Muthuselvam",place_id:"ChIJPb1_eEOdBjsRjL9IVCVJhi8"},
+  {id:29,name:"Puliyankudi-1",agm:"Muthuselvam",place_id:"ChIJjZqoc46RBjsRQTGHnNC8xxA"},
+  {id:30,name:"Sengottai-1",agm:"Muthuselvam",place_id:"ChIJw3zzKiaBBjsR9KDyGpn1nXU"},
+  {id:31,name:"Rajapalayam",agm:"Muthuselvam",place_id:"ChIJW2ot-DDpBjsRMTfMF2IV-xE"},
+  {id:32,name:"Virudhunagar",agm:"Venkadesan",place_id:"ChIJN3jzNJgsATsRCU3nrB5ntKE"},
+  {id:33,name:"Virudhunagar-2",agm:"Venkadesan",place_id:"ChIJPezaX7wtATsR9sHhFOG6A1c"},
+  {id:34,name:"Aruppukottai",agm:"Venkadesan",place_id:"ChIJy6qqqgYwATsRbcp-hXnoruM"},
+  {id:35,name:"Aruppukottai-2",agm:"Venkadesan",place_id:"ChIJY04wY58xATsRuoJSichVQQE"},
+  {id:36,name:"Sivakasi",agm:"Venkadesan",place_id:"ChIJI2JvEePOBjsREh8b-x4WF4U"},
 ];
 const AGMS=[...new Set(BRANCHES.map(b=>b.agm))];
 const AGM_COLORS=["#4f46e5","#059669","#d97706","#7c3aed","#e11d48","#0284c7"];
@@ -590,123 +597,37 @@ function runExport(){
 // ── PANELS ─────────────────────────────────────────────────
 function closePanel(id){document.getElementById(id).classList.remove("open")}
 
-const GH_OWNER="Rocklinks", GH_REPO="rev";
 
-function getGhToken(){return localStorage.getItem("gh_pat")||""}
-function setGhToken(t){localStorage.setItem("gh_pat",t)}
 
 async function openLive(){
-  document.getElementById("liveOverlay").classList.add("open");
-  const body=document.getElementById("liveBody");
-  body.innerHTML='<div class="no-data"><span class="spin"></span> Fetching live data...</div>';
-  try{
-    const r=await fetch("scraper/live_data.json?t="+Date.now());
-    if(!r.ok)throw new Error("No live data yet");
-    const ld=await r.json();
-    renderLiveData(ld);
-  }catch(e){body.innerHTML=`<div class="no-data">${e.message}</div>`;}
-}
-
-function renderLiveData(ld){
-  const body=document.getElementById("liveBody");
-  const runTime=ld.run_time?new Date(ld.run_time).toLocaleString("en-IN",{timeZone:"Asia/Kolkata"}):"Never";
-  const todayLabel=ld.today||"—";
-  let html=`<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;padding-bottom:12px;border-bottom:1px solid #e2e8f0">
-    <div>
-      <p style="color:var(--muted);font-size:12px">Last scraped: ${runTime}</p>
-      <p style="color:var(--text);font-size:13px;font-weight:600;margin-top:4px">Date: ${todayLabel}</p>
+  currentView="live";
+  document.querySelectorAll(".s-item").forEach(x=>x.classList.remove("active"));
+  const mc=document.getElementById("mainContent");
+  const filtered=getFiltered();
+  let html=`<div class="section">
+    <div class="section-hdr">
+      <div class="section-title">&#128308; Live Tracker &mdash; Google Maps Embeds</div>
+      <div class="ctrls">
+        <div class="chip-row">${AGMS.map(a=>`<div class="chip${activeAgm===a?" selected":""}" onclick="filterAgm('${a}',document.getElementById('agmSb_${a}'))">${a}</div>`).join("")}</div>
+      </div>
     </div>
-    <button onclick="runLiveTracker()" id="liveRunBtn" style="padding:8px 16px;border-radius:8px;border:none;background:#6366f1;color:#fff;font-size:12px;font-weight:600;cursor:pointer">&#9654; Run Now</button>
-  </div>`;
-  const groups=activeAgm?{[activeAgm]:ld.agm_summary?.[activeAgm]}:ld.agm_summary||{};
-  Object.entries(groups).forEach(([agm,g])=>{
-    if(!g)return;
-    html+=`<div class="agm-section-head"><h3>&#x1F464; ${agm}</h3><span class="badge b-green">+${g.total_today} new</span></div>`;
-    (g.branches||[]).forEach(b=>{
-      html+=`<div class="live-card"><div><div class="live-name">${b.name}</div><div class="live-agm">Total: ${(b.total||0).toLocaleString()} &middot; Baseline: ${(b.baseline||0).toLocaleString()}</div></div><div style="text-align:right"><div class="live-new">+${b.today_count||0}</div><div class="live-sub">since 12 AM</div></div></div>`;
-    });
+    <div style="padding:16px;display:grid;grid-template-columns:repeat(auto-fill,minmax(400px,1fr));gap:16px">`;
+  filtered.forEach(b=>{
+    const mapsUrl=`https://www.google.com/maps/embed/v1/place?key=AIzaSyBFw0Tbyey9zT12UFkR_0XGRzCpIvG0V14&q=place_id:${b.place_id}&zoom=15`;
+    const directUrl=`https://www.google.com/maps/place/?q=place_id:${b.place_id}`;
+    html+=`<div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden;box-shadow:var(--shadow)">
+      <div style="padding:10px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between">
+        <div>
+          <div style="font-weight:700;font-size:13px;color:var(--text)">${b.name}</div>
+          <div style="font-size:11px;color:var(--muted)">${b.agm}</div>
+        </div>
+        <a href="${directUrl}" target="_blank" style="font-size:11px;color:var(--indigo);text-decoration:none;font-weight:600">Open in Maps &#8599;</a>
+      </div>
+      <iframe src="${mapsUrl}" width="100%" height="250" style="border:0" allowfullscreen loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+    </div>`;
   });
-  if(!html.includes("agm-section-head")) html+='<div class="no-data">No data available.</div>';
-  body.innerHTML=html;
-}
-
-async function runLiveTracker(){
-  let token=getGhToken();
-  if(!token){
-    token=prompt("Enter your GitHub PAT (with repo + actions:write scopes):");
-    if(!token)return;
-    setGhToken(token.trim());
-  }
-  const btn=document.getElementById("liveRunBtn");
-  const body=document.getElementById("liveBody");
-  btn.disabled=true; btn.textContent="Starting...";
-
-  try{
-    // Trigger workflow_dispatch
-    const triggerResp=await fetch(`https://api.github.com/repos/${GH_OWNER}/${GH_REPO}/actions/workflows/live.yml/dispatches`,{
-      method:"POST",
-      headers:{"Authorization":"Bearer "+token,"Accept":"application/vnd.github+json","X-GitHub-Api-Version":"2022-11-28","Content-Type":"application/json"},
-      body:JSON.stringify({ref:"main"})
-    });
-    if(!triggerResp.ok && triggerResp.status!==204){
-      const err=await triggerResp.json().catch(()=>({}));
-      if(triggerResp.status===401||triggerResp.status===403){
-        setGhToken("");
-        throw new Error("Invalid token. Click Run Now to try again.");
-      }
-      throw new Error(err.message||"Failed to trigger workflow ("+triggerResp.status+")");
-    }
-
-    body.innerHTML='<div class="no-data"><span class="spin"></span> Scraping live reviews... This may take 2-3 minutes.</div><div style="text-align:center;margin-top:12px"><div id="liveProgress" style="font-size:12px;color:#94a3b8">Waiting for workflow to start...</div></div>';
-
-    // Wait for workflow to appear in runs
-    await new Promise(r=>setTimeout(r,3000));
-    let runId=null, attempts=0;
-    while(attempts<20 && !runId){
-      const runsResp=await fetch(`https://api.github.com/repos/${GH_OWNER}/${GH_REPO}/actions/workflows/live.yml/runs?per_page=1`,{
-        headers:{"Authorization":"Bearer "+token,"Accept":"application/vnd.github+json","X-GitHub-Api-Version":"2022-11-28"}
-      });
-      const runsData=await runsResp.json();
-      const latest=runsData.workflow_runs?.[0];
-      if(latest && latest.created_at > new Date(Date.now()-60000).toISOString()){
-        runId=latest.id;
-      }else{
-        attempts++;
-        document.getElementById("liveProgress").textContent=`Searching for workflow run... (${attempts})`;
-        await new Promise(r=>setTimeout(r,2000));
-      }
-    }
-    if(!runId) throw new Error("Could not detect workflow run. Check Actions tab.");
-
-    // Poll until complete
-    let status="queued", elapsed=0;
-    while(status!=="completed" && elapsed<180){
-      await new Promise(r=>setTimeout(r,5000));
-      elapsed+=5;
-      const stResp=await fetch(`https://api.github.com/repos/${GH_OWNER}/${GH_REPO}/actions/runs/${runId}`,{
-        headers:{"Authorization":"Bearer "+token,"Accept":"application/vnd.github+json","X-GitHub-Api-Version":"2022-11-28"}
-      });
-      const stData=await stResp.json();
-      status=stData.status||"unknown";
-      const concl=stData.conclusion||"";
-      document.getElementById("liveProgress").textContent=`Status: ${status}${concl?" ("+concl+")":""} \u00B7 ${elapsed}s elapsed`;
-      if(status==="completed"){
-        if(concl!=="success") throw new Error("Workflow finished with status: "+concl);
-        break;
-      }
-    }
-    if(status!=="completed") throw new Error("Workflow timed out after 3 minutes.");
-
-    // Fetch fresh data
-    document.getElementById("liveProgress").textContent="Loading fresh data...";
-    await new Promise(r=>setTimeout(r,2000));
-    const fresh=await fetch("scraper/live_data.json?t="+Date.now());
-    if(!fresh.ok) throw new Error("Could not load updated data");
-    const ld=await fresh.json();
-    renderLiveData(ld);
-  }catch(e){
-    body.innerHTML=`<div class="no-data">${e.message}</div><div style="text-align:center;margin-top:12px"><button onclick="openLive()" style="padding:8px 16px;border-radius:8px;border:1px solid #e2e8f0;background:#fff;color:#1a1a2e;font-size:12px;cursor:pointer">Retry</button></div>`;
-  }
+  html+=`</div></div>`;
+  mc.innerHTML=html;
 }
 
 // ── REVIEWS PANEL ────────────────────────────────────────────
@@ -812,7 +733,7 @@ function renderBranchReviews(){
   body.innerHTML=h;
 }
 
-document.addEventListener("keydown",e=>{if(e.key==="Escape"){closePanel("liveOverlay");closePanel("reviewsOverlay");}});
+document.addEventListener("keydown",e=>{if(e.key==="Escape"){closePanel("reviewsOverlay");}});
 init();
 </script>
 </body>
