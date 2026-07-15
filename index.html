@@ -723,14 +723,14 @@ function renderLiveResults(ld){
     html+=`<div class="agm-section-head"><h3>&#x1F464; ${agm}</h3><span class="badge b-green">+${g.total_today} new</span></div>`;
     html+=`<div class="tbl-wrap"><table><thead><tr><th>Branch</th><th>Total</th><th>Baseline</th><th>Today</th><th></th></tr></thead><tbody>`;
     (g.branches||[]).forEach(b=>{
-      const diff=(b.total||0)-(b.baseline||0);
-      const diffBadge=diff>0?`<span class="badge b-green">+${diff}</span>`:diff<0?`<span class="badge" style="background:rgba(225,29,72,.1);color:var(--rose)">${diff}</span>`:'<span class="badge b-gray">0</span>';
+      const diff=b.today_count||0;
+      const diffBadge=diff>0?`<span class="badge b-green">+${diff}</span>`:'<span class="badge b-gray">0</span>';
       const mapsUrl=`https://www.google.com/maps/place/?q=place_id:${BRANCHES.find(x=>x.id===b.id)?.place_id||""}`;
       html+=`<tr>
         <td class="td-b">${b.name}</td>
         <td><strong>${(b.total||0).toLocaleString()}</strong></td>
         <td style="color:var(--muted)">${(b.baseline||0).toLocaleString()}</td>
-        <td><strong style="color:var(--green)">+${b.today_count||0}</strong></td>
+        <td><strong style="color:var(--green)">+${diff}</strong></td>
         <td>${diffBadge}</td>
         <td><a href="${mapsUrl}" target="_blank" style="font-size:11px;color:var(--indigo);text-decoration:none">Maps &#8599;</a></td>
       </tr>`;

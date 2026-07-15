@@ -75,6 +75,50 @@ def parse_relative_date(text, today_ist):
     m = re.search(r"(\d+)\s*day", t)
     if m:
         return (today_ist - timedelta(days=int(m.group(1)))).date().strftime("%Y-%m-%d")
+    m = re.search(r"(\d+)\s*week", t)
+    if m:
+        return (today_ist - timedelta(weeks=int(m.group(1)))).date().strftime("%Y-%m-%d")
+    m = re.search(r"(\d+)\s*month", t)
+    if m:
+        months = int(m.group(1))
+        year = today_ist.year
+        month = today_ist.month - months
+        while month < 1:
+            month += 12
+            year -= 1
+        day = min(today_ist.day, 28)
+        return datetime(year, month, day, tzinfo=today_ist.tzinfo).date().strftime("%Y-%m-%d")
+    m = re.search(r"(\d+)\s*year", t)
+    if m:
+        return (today_ist.replace(year=today_ist.year - int(m.group(1)))).date().strftime("%Y-%m-%d")
+    # Absolute date: "Jun 2025", "January 15", "15 Jan 2025", etc.
+    months_map = {
+        "jan":1,"january":1,"feb":2,"february":2,"mar":3,"march":3,
+        "apr":4,"april":4,"may":5,"jun":6,"june":6,
+        "jul":7,"july":7,"aug":8,"august":8,"sep":9,"september":9,
+        "oct":10,"october":10,"nov":11,"november":11,"dec":12,"december":12
+    }
+    # "Jun 2025" or "June 2025"
+    m = re.search(r"(january|february|march|april|may|june|july|august|september|october|november|december|jan|feb|mar|apr|jun|jul|aug|sep|oct|nov|dec)\s+(\d{4})", t, re.I)
+    if m:
+        mon = months_map[m.group(1).lower()]
+        yr = int(m.group(2))
+        day = min(today_ist.day, 28)
+        return datetime(yr, mon, day, tzinfo=today_ist.tzinfo).date().strftime("%Y-%m-%d")
+    # "15 Jan 2025" or "15 January 2025"
+    m = re.search(r"(\d{1,2})\s+(january|february|march|april|may|june|july|august|september|october|november|december|jan|feb|mar|apr|jun|jul|aug|sep|oct|nov|dec)\s+(\d{4})", t, re.I)
+    if m:
+        day = int(m.group(1))
+        mon = months_map[m.group(2).lower()]
+        yr = int(m.group(3))
+        return datetime(yr, mon, day, tzinfo=today_ist.tzinfo).date().strftime("%Y-%m-%d")
+    # "Jan 15, 2025" or "January 15, 2025"
+    m = re.search(r"(january|february|march|april|may|june|july|august|september|october|november|december|jan|feb|mar|apr|jun|jul|aug|sep|oct|nov|dec)\s+(\d{1,2}),?\s+(\d{4})", t, re.I)
+    if m:
+        mon = months_map[m.group(1).lower()]
+        day = int(m.group(2))
+        yr = int(m.group(3))
+        return datetime(yr, mon, day, tzinfo=today_ist.tzinfo).date().strftime("%Y-%m-%d")
     return None
 
 async def get_text(loc) -> str:
@@ -210,12 +254,13 @@ async def extract_review_cards(page):
                 sc = await spans.count()
                 for j in range(min(sc, 30)):
                     t = await get_text(spans.nth(j))
-                    if re.search(r"ago|yesterday|day|week|month|year|edited", t, re.I) and len(t) < 40:
+                    if re.search(r"ago|yesterday|day|week|month|year|edited|jan|feb|mar|apr|jun|jul|aug|sep|oct|nov|dec", t, re.I) and len(t) < 50:
                         dt = t; break
                 if not dt: continue
 
                 parsed = parse_relative_date(dt, today_ist_dt)
-                if parsed is None: continue
+                if parsed is None:
+                    parsed = today_ist_dt.date().strftime("%Y-%m-%d")
 
                 # Stars from individual review
                 rev_stars = 0
@@ -361,7 +406,7 @@ async def count_reviews_by_scroll(page, today_str):
                 sc = await spans.count()
                 for j in range(min(sc, 30)):
                     t = await get_text(spans.nth(j))
-                    if re.search(r"ago|yesterday|day|week|month|year|edited", t, re.I) and len(t) < 40:
+                    if re.search(r"ago|yesterday|day|week|month|year|edited|jan|feb|mar|apr|jun|jul|aug|sep|oct|nov|dec", t, re.I) and len(t) < 50:
                         dt = t; break
                 if not dt: continue
 
@@ -509,7 +554,7 @@ def save_results(results, success, failed, snap_date, run_time):
         r = results[bid]
         prev_total = baseline_snap.get(bid,{}).get("total_snap", data.get("branches",{}).get(bid,{}).get("overall",0))
         raw_delta  = r["total"] - prev_total
-        daily_count = r.get("today_count", 0)
+        daily_count = max(0, r.get("today_count", 0))
         monthly    = monthly_snap.get(bid,{}).get("monthly",0) + daily_count
         data["daily"][snap_date][bid] = {
             "total_snap":r["total"], "daily_count":daily_count,

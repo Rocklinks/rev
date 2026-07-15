@@ -156,6 +156,46 @@ def parse_relative_date(text, today_ist):
     m = re.search(r"(\d+)\s*day", t)
     if m:
         return (today_ist - timedelta(days=int(m.group(1)))).date().strftime("%Y-%m-%d")
+    m = re.search(r"(\d+)\s*week", t)
+    if m:
+        return (today_ist - timedelta(weeks=int(m.group(1)))).date().strftime("%Y-%m-%d")
+    m = re.search(r"(\d+)\s*month", t)
+    if m:
+        months = int(m.group(1))
+        year = today_ist.year
+        month = today_ist.month - months
+        while month < 1:
+            month += 12
+            year -= 1
+        day = min(today_ist.day, 28)
+        return datetime(year, month, day, tzinfo=today_ist.tzinfo).date().strftime("%Y-%m-%d")
+    m = re.search(r"(\d+)\s*year", t)
+    if m:
+        return (today_ist.replace(year=today_ist.year - int(m.group(1)))).date().strftime("%Y-%m-%d")
+    months_map = {
+        "jan":1,"january":1,"feb":2,"february":2,"mar":3,"march":3,
+        "apr":4,"april":4,"may":5,"jun":6,"june":6,
+        "jul":7,"july":7,"aug":8,"august":8,"sep":9,"september":9,
+        "oct":10,"october":10,"nov":11,"november":11,"dec":12,"december":12
+    }
+    m = re.search(r"(january|february|march|april|may|june|july|august|september|october|november|december|jan|feb|mar|apr|jun|jul|aug|sep|oct|nov|dec)\s+(\d{4})", t, re.I)
+    if m:
+        mon = months_map[m.group(1).lower()]
+        yr = int(m.group(2))
+        day = min(today_ist.day, 28)
+        return datetime(yr, mon, day, tzinfo=today_ist.tzinfo).date().strftime("%Y-%m-%d")
+    m = re.search(r"(\d{1,2})\s+(january|february|march|april|may|june|july|august|september|october|november|december|jan|feb|mar|apr|jun|jul|aug|sep|oct|nov|dec)\s+(\d{4})", t, re.I)
+    if m:
+        day = int(m.group(1))
+        mon = months_map[m.group(2).lower()]
+        yr = int(m.group(3))
+        return datetime(yr, mon, day, tzinfo=today_ist.tzinfo).date().strftime("%Y-%m-%d")
+    m = re.search(r"(january|february|march|april|may|june|july|august|september|october|november|december|jan|feb|mar|apr|jun|jul|aug|sep|oct|nov|dec)\s+(\d{1,2}),?\s+(\d{4})", t, re.I)
+    if m:
+        mon = months_map[m.group(1).lower()]
+        day = int(m.group(2))
+        yr = int(m.group(3))
+        return datetime(yr, mon, day, tzinfo=today_ist.tzinfo).date().strftime("%Y-%m-%d")
     return None
 
 async def count_reviews_by_scroll(page, today_str):
@@ -207,7 +247,7 @@ async def count_reviews_by_scroll(page, today_str):
                 sc = await spans.count()
                 for j in range(min(sc, 30)):
                     t = await get_text(spans.nth(j))
-                    if re.search(r"ago|yesterday|day|week|month|year|edited", t, re.I) and len(t) < 40:
+                    if re.search(r"ago|yesterday|day|week|month|year|edited|jan|feb|mar|apr|jun|jul|aug|sep|oct|nov|dec", t, re.I) and len(t) < 50:
                         dt = t; break
                 if not dt: continue
 
