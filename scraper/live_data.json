@@ -1,6 +1,686 @@
 {
-  "run_time": null,
-  "today": null,
-  "branches": {},
-  "agm_summary": {}
+  "run_time": "2026-07-15T11:02:54.569670+00:00",
+  "today": "2026-07-14",
+  "branches": {
+    "9": {
+      "id": 9,
+      "name": "Ambasamudram-1",
+      "agm": "Johnson",
+      "total": 962,
+      "stars": 4.9,
+      "baseline": 962,
+      "today_count": 5
+    },
+    "6": {
+      "id": 6,
+      "name": "Udankudi",
+      "agm": "Sivaperumal",
+      "total": 2050,
+      "stars": 4.9,
+      "baseline": 2050,
+      "today_count": 2
+    },
+    "4": {
+      "id": 4,
+      "name": "Thisayanvilai-1",
+      "agm": "Sivaperumal",
+      "total": 410,
+      "stars": 5.0,
+      "baseline": 411,
+      "today_count": 1
+    },
+    "13": {
+      "id": 13,
+      "name": "Thuckalay-1",
+      "agm": "Jeeva",
+      "total": 1153,
+      "stars": 4.7,
+      "baseline": 1153,
+      "today_count": 4
+    },
+    "3": {
+      "id": 3,
+      "name": "Thiruchendur-1",
+      "agm": "Sivaperumal",
+      "total": 1291,
+      "stars": 4.9,
+      "baseline": 1291,
+      "today_count": 0
+    },
+    "14": {
+      "id": 14,
+      "name": "Colachel-1",
+      "agm": "Jeeva",
+      "total": 300,
+      "stars": 4.9,
+      "baseline": 300,
+      "today_count": 1
+    },
+    "16": {
+      "id": 16,
+      "name": "Monday Market",
+      "agm": "Jeeva",
+      "total": 386,
+      "stars": 4.9,
+      "baseline": 386,
+      "today_count": 0
+    },
+    "8": {
+      "id": 8,
+      "name": "Valliyur-1",
+      "agm": "Johnson",
+      "total": 1201,
+      "stars": 4.8,
+      "baseline": 1201,
+      "today_count": 0
+    },
+    "7": {
+      "id": 7,
+      "name": "Tirunelveli-1",
+      "agm": "Johnson",
+      "total": 4346,
+      "stars": 4.8,
+      "baseline": 4346,
+      "today_count": 6
+    },
+    "10": {
+      "id": 10,
+      "name": "Anjugramam-1",
+      "agm": "Johnson",
+      "total": 731,
+      "stars": 4.9,
+      "baseline": 732,
+      "today_count": 0
+    },
+    "11": {
+      "id": 11,
+      "name": "Nagercoil",
+      "agm": "Jeeva",
+      "total": 3145,
+      "stars": 4.7,
+      "baseline": 3147,
+      "today_count": 0
+    },
+    "18": {
+      "id": 18,
+      "name": "Kovilpatti",
+      "agm": "Seenivasan",
+      "total": 2568,
+      "stars": 4.6,
+      "baseline": 2568,
+      "today_count": 3
+    },
+    "5": {
+      "id": 5,
+      "name": "Eral-2",
+      "agm": "Sivaperumal",
+      "total": 1126,
+      "stars": 4.9,
+      "baseline": 1126,
+      "today_count": 0
+    },
+    "1": {
+      "id": 1,
+      "name": "Tuticorin-1",
+      "agm": "Sivaperumal",
+      "total": 7246,
+      "stars": 4.9,
+      "baseline": 7251,
+      "today_count": 0
+    },
+    "22": {
+      "id": 22,
+      "name": "Villathikullam",
+      "agm": "Seenivasan",
+      "total": 649,
+      "stars": 4.8,
+      "baseline": 649,
+      "today_count": 3
+    },
+    "23": {
+      "id": 23,
+      "name": "Sattur-2",
+      "agm": "Seenivasan",
+      "total": 1001,
+      "stars": 4.8,
+      "baseline": 1001,
+      "today_count": 3
+    },
+    "12": {
+      "id": 12,
+      "name": "Marthandam",
+      "agm": "Jeeva",
+      "total": 1144,
+      "stars": 4.7,
+      "baseline": 1144,
+      "today_count": 3
+    },
+    "2": {
+      "id": 2,
+      "name": "Tuticorin-2",
+      "agm": "Sivaperumal",
+      "total": 6493,
+      "stars": 4.8,
+      "baseline": 6493,
+      "today_count": 3
+    },
+    "24": {
+      "id": 24,
+      "name": "Sankarankovil-1",
+      "agm": "Seenivasan",
+      "total": 1047,
+      "stars": 4.9,
+      "baseline": 1046,
+      "today_count": 5
+    },
+    "26": {
+      "id": 26,
+      "name": "Thenkasi",
+      "agm": "Muthuselvam",
+      "total": 6174,
+      "stars": 4.9,
+      "baseline": 6173,
+      "today_count": 1
+    },
+    "28": {
+      "id": 28,
+      "name": "Surandai-1",
+      "agm": "Muthuselvam",
+      "total": 2291,
+      "stars": 4.9,
+      "baseline": 2291,
+      "today_count": 1
+    },
+    "15": {
+      "id": 15,
+      "name": "Kulasekharam-1",
+      "agm": "Jeeva",
+      "total": 440,
+      "stars": 4.9,
+      "baseline": 440,
+      "today_count": 0
+    },
+    "31": {
+      "id": 31,
+      "name": "Rajapalayam",
+      "agm": "Muthuselvam",
+      "total": 2142,
+      "stars": 4.8,
+      "baseline": 2142,
+      "today_count": 3
+    },
+    "21": {
+      "id": 21,
+      "name": "Sayalkudi-1",
+      "agm": "Seenivasan",
+      "total": 682,
+      "stars": 4.9,
+      "baseline": 682,
+      "today_count": 3
+    },
+    "32": {
+      "id": 32,
+      "name": "Virudhunagar",
+      "agm": "Venkadesan",
+      "total": 2153,
+      "stars": 4.8,
+      "baseline": 2153,
+      "today_count": 4
+    },
+    "33": {
+      "id": 33,
+      "name": "Virudhunagar-2",
+      "agm": "Venkadesan",
+      "total": 1749,
+      "stars": 4.9,
+      "baseline": 1749,
+      "today_count": 6
+    },
+    "34": {
+      "id": 34,
+      "name": "Aruppukottai",
+      "agm": "Venkadesan",
+      "total": 2067,
+      "stars": 4.8,
+      "baseline": 2067,
+      "today_count": 1
+    },
+    "35": {
+      "id": 35,
+      "name": "Aruppukottai-2",
+      "agm": "Venkadesan",
+      "total": 1005,
+      "stars": 5.0,
+      "baseline": 1005,
+      "today_count": 5
+    },
+    "36": {
+      "id": 36,
+      "name": "Sivakasi",
+      "agm": "Venkadesan",
+      "total": 1229,
+      "stars": 4.8,
+      "baseline": 1229,
+      "today_count": 2
+    },
+    "25": {
+      "id": 25,
+      "name": "Kayathar-1",
+      "agm": "Seenivasan",
+      "total": 1023,
+      "stars": 5.0,
+      "baseline": 1024,
+      "today_count": 5
+    },
+    "17": {
+      "id": 17,
+      "name": "Karungal-1",
+      "agm": "Jeeva",
+      "total": 789,
+      "stars": 4.9,
+      "baseline": 789,
+      "today_count": 2
+    },
+    "20": {
+      "id": 20,
+      "name": "Paramakudi",
+      "agm": "Seenivasan",
+      "total": 1184,
+      "stars": 4.9,
+      "baseline": 1186,
+      "today_count": 6
+    },
+    "29": {
+      "id": 29,
+      "name": "Puliyankudi-1",
+      "agm": "Muthuselvam",
+      "total": 1045,
+      "stars": 4.9,
+      "baseline": 1044,
+      "today_count": 3
+    },
+    "27": {
+      "id": 27,
+      "name": "Thenkasi-2",
+      "agm": "Muthuselvam",
+      "total": 4012,
+      "stars": 5.0,
+      "baseline": 4015,
+      "today_count": 2
+    },
+    "19": {
+      "id": 19,
+      "name": "Ramnad",
+      "agm": "Seenivasan",
+      "total": 2467,
+      "stars": 4.8,
+      "baseline": 2468,
+      "today_count": 10
+    },
+    "30": {
+      "id": 30,
+      "name": "Sengottai-1",
+      "agm": "Muthuselvam",
+      "total": 740,
+      "stars": 5.0,
+      "baseline": 740,
+      "today_count": 0
+    }
+  },
+  "agm_summary": {
+    "Johnson": {
+      "total_today": 11,
+      "branches": [
+        {
+          "id": 9,
+          "name": "Ambasamudram-1",
+          "agm": "Johnson",
+          "total": 962,
+          "stars": 4.9,
+          "baseline": 962,
+          "today_count": 5
+        },
+        {
+          "id": 8,
+          "name": "Valliyur-1",
+          "agm": "Johnson",
+          "total": 1201,
+          "stars": 4.8,
+          "baseline": 1201,
+          "today_count": 0
+        },
+        {
+          "id": 7,
+          "name": "Tirunelveli-1",
+          "agm": "Johnson",
+          "total": 4346,
+          "stars": 4.8,
+          "baseline": 4346,
+          "today_count": 6
+        },
+        {
+          "id": 10,
+          "name": "Anjugramam-1",
+          "agm": "Johnson",
+          "total": 731,
+          "stars": 4.9,
+          "baseline": 732,
+          "today_count": 0
+        }
+      ]
+    },
+    "Sivaperumal": {
+      "total_today": 6,
+      "branches": [
+        {
+          "id": 6,
+          "name": "Udankudi",
+          "agm": "Sivaperumal",
+          "total": 2050,
+          "stars": 4.9,
+          "baseline": 2050,
+          "today_count": 2
+        },
+        {
+          "id": 4,
+          "name": "Thisayanvilai-1",
+          "agm": "Sivaperumal",
+          "total": 410,
+          "stars": 5.0,
+          "baseline": 411,
+          "today_count": 1
+        },
+        {
+          "id": 3,
+          "name": "Thiruchendur-1",
+          "agm": "Sivaperumal",
+          "total": 1291,
+          "stars": 4.9,
+          "baseline": 1291,
+          "today_count": 0
+        },
+        {
+          "id": 5,
+          "name": "Eral-2",
+          "agm": "Sivaperumal",
+          "total": 1126,
+          "stars": 4.9,
+          "baseline": 1126,
+          "today_count": 0
+        },
+        {
+          "id": 1,
+          "name": "Tuticorin-1",
+          "agm": "Sivaperumal",
+          "total": 7246,
+          "stars": 4.9,
+          "baseline": 7251,
+          "today_count": 0
+        },
+        {
+          "id": 2,
+          "name": "Tuticorin-2",
+          "agm": "Sivaperumal",
+          "total": 6493,
+          "stars": 4.8,
+          "baseline": 6493,
+          "today_count": 3
+        }
+      ]
+    },
+    "Jeeva": {
+      "total_today": 10,
+      "branches": [
+        {
+          "id": 13,
+          "name": "Thuckalay-1",
+          "agm": "Jeeva",
+          "total": 1153,
+          "stars": 4.7,
+          "baseline": 1153,
+          "today_count": 4
+        },
+        {
+          "id": 14,
+          "name": "Colachel-1",
+          "agm": "Jeeva",
+          "total": 300,
+          "stars": 4.9,
+          "baseline": 300,
+          "today_count": 1
+        },
+        {
+          "id": 16,
+          "name": "Monday Market",
+          "agm": "Jeeva",
+          "total": 386,
+          "stars": 4.9,
+          "baseline": 386,
+          "today_count": 0
+        },
+        {
+          "id": 11,
+          "name": "Nagercoil",
+          "agm": "Jeeva",
+          "total": 3145,
+          "stars": 4.7,
+          "baseline": 3147,
+          "today_count": 0
+        },
+        {
+          "id": 12,
+          "name": "Marthandam",
+          "agm": "Jeeva",
+          "total": 1144,
+          "stars": 4.7,
+          "baseline": 1144,
+          "today_count": 3
+        },
+        {
+          "id": 15,
+          "name": "Kulasekharam-1",
+          "agm": "Jeeva",
+          "total": 440,
+          "stars": 4.9,
+          "baseline": 440,
+          "today_count": 0
+        },
+        {
+          "id": 17,
+          "name": "Karungal-1",
+          "agm": "Jeeva",
+          "total": 789,
+          "stars": 4.9,
+          "baseline": 789,
+          "today_count": 2
+        }
+      ]
+    },
+    "Seenivasan": {
+      "total_today": 38,
+      "branches": [
+        {
+          "id": 18,
+          "name": "Kovilpatti",
+          "agm": "Seenivasan",
+          "total": 2568,
+          "stars": 4.6,
+          "baseline": 2568,
+          "today_count": 3
+        },
+        {
+          "id": 22,
+          "name": "Villathikullam",
+          "agm": "Seenivasan",
+          "total": 649,
+          "stars": 4.8,
+          "baseline": 649,
+          "today_count": 3
+        },
+        {
+          "id": 23,
+          "name": "Sattur-2",
+          "agm": "Seenivasan",
+          "total": 1001,
+          "stars": 4.8,
+          "baseline": 1001,
+          "today_count": 3
+        },
+        {
+          "id": 24,
+          "name": "Sankarankovil-1",
+          "agm": "Seenivasan",
+          "total": 1047,
+          "stars": 4.9,
+          "baseline": 1046,
+          "today_count": 5
+        },
+        {
+          "id": 21,
+          "name": "Sayalkudi-1",
+          "agm": "Seenivasan",
+          "total": 682,
+          "stars": 4.9,
+          "baseline": 682,
+          "today_count": 3
+        },
+        {
+          "id": 25,
+          "name": "Kayathar-1",
+          "agm": "Seenivasan",
+          "total": 1023,
+          "stars": 5.0,
+          "baseline": 1024,
+          "today_count": 5
+        },
+        {
+          "id": 20,
+          "name": "Paramakudi",
+          "agm": "Seenivasan",
+          "total": 1184,
+          "stars": 4.9,
+          "baseline": 1186,
+          "today_count": 6
+        },
+        {
+          "id": 19,
+          "name": "Ramnad",
+          "agm": "Seenivasan",
+          "total": 2467,
+          "stars": 4.8,
+          "baseline": 2468,
+          "today_count": 10
+        }
+      ]
+    },
+    "Muthuselvam": {
+      "total_today": 10,
+      "branches": [
+        {
+          "id": 26,
+          "name": "Thenkasi",
+          "agm": "Muthuselvam",
+          "total": 6174,
+          "stars": 4.9,
+          "baseline": 6173,
+          "today_count": 1
+        },
+        {
+          "id": 28,
+          "name": "Surandai-1",
+          "agm": "Muthuselvam",
+          "total": 2291,
+          "stars": 4.9,
+          "baseline": 2291,
+          "today_count": 1
+        },
+        {
+          "id": 31,
+          "name": "Rajapalayam",
+          "agm": "Muthuselvam",
+          "total": 2142,
+          "stars": 4.8,
+          "baseline": 2142,
+          "today_count": 3
+        },
+        {
+          "id": 29,
+          "name": "Puliyankudi-1",
+          "agm": "Muthuselvam",
+          "total": 1045,
+          "stars": 4.9,
+          "baseline": 1044,
+          "today_count": 3
+        },
+        {
+          "id": 27,
+          "name": "Thenkasi-2",
+          "agm": "Muthuselvam",
+          "total": 4012,
+          "stars": 5.0,
+          "baseline": 4015,
+          "today_count": 2
+        },
+        {
+          "id": 30,
+          "name": "Sengottai-1",
+          "agm": "Muthuselvam",
+          "total": 740,
+          "stars": 5.0,
+          "baseline": 740,
+          "today_count": 0
+        }
+      ]
+    },
+    "Venkadesan": {
+      "total_today": 18,
+      "branches": [
+        {
+          "id": 32,
+          "name": "Virudhunagar",
+          "agm": "Venkadesan",
+          "total": 2153,
+          "stars": 4.8,
+          "baseline": 2153,
+          "today_count": 4
+        },
+        {
+          "id": 33,
+          "name": "Virudhunagar-2",
+          "agm": "Venkadesan",
+          "total": 1749,
+          "stars": 4.9,
+          "baseline": 1749,
+          "today_count": 6
+        },
+        {
+          "id": 34,
+          "name": "Aruppukottai",
+          "agm": "Venkadesan",
+          "total": 2067,
+          "stars": 4.8,
+          "baseline": 2067,
+          "today_count": 1
+        },
+        {
+          "id": 35,
+          "name": "Aruppukottai-2",
+          "agm": "Venkadesan",
+          "total": 1005,
+          "stars": 5.0,
+          "baseline": 1005,
+          "today_count": 5
+        },
+        {
+          "id": 36,
+          "name": "Sivakasi",
+          "agm": "Venkadesan",
+          "total": 1229,
+          "stars": 4.8,
+          "baseline": 1229,
+          "today_count": 2
+        }
+      ]
+    }
+  }
 }
