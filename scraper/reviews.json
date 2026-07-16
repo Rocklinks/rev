@@ -3,39 +3,39 @@
     "1": {
       "id": 1,
       "name": "Tuticorin-1",
-      "agm": "Sivaperumal",
+      "agm": "Siva",
       "overall": 7251,
       "star_rating": 4.9,
-      "monthly": 338
+      "monthly": 362
     },
     "2": {
       "id": 2,
       "name": "Tuticorin-2",
-      "agm": "Sivaperumal",
+      "agm": "Siva",
       "overall": 6495,
       "star_rating": 4.8,
-      "monthly": 112
+      "monthly": 109
     },
     "3": {
       "id": 3,
       "name": "Thiruchendur-1",
-      "agm": "Sivaperumal",
+      "agm": "Siva",
       "overall": 1292,
       "star_rating": 4.9,
-      "monthly": 57
+      "monthly": 58
     },
     "4": {
       "id": 4,
       "name": "Thisayanvilai-1",
-      "agm": "Sivaperumal",
+      "agm": "Siva",
       "overall": 410,
       "star_rating": 5.0,
-      "monthly": 30
+      "monthly": 28
     },
     "5": {
       "id": 5,
       "name": "Eral-2",
-      "agm": "Sivaperumal",
+      "agm": "Siva",
       "overall": 1126,
       "star_rating": 4.9,
       "monthly": 33
@@ -43,23 +43,23 @@
     "6": {
       "id": 6,
       "name": "Udankudi",
-      "agm": "Sivaperumal",
+      "agm": "Siva",
       "overall": 2053,
       "star_rating": 4.9,
-      "monthly": 38
+      "monthly": 40
     },
     "7": {
       "id": 7,
       "name": "Tirunelveli-1",
-      "agm": "Johnson",
+      "agm": "John",
       "overall": 4346,
       "star_rating": 4.8,
-      "monthly": 141
+      "monthly": 144
     },
     "8": {
       "id": 8,
       "name": "Valliyur-1",
-      "agm": "Johnson",
+      "agm": "John",
       "overall": 1201,
       "star_rating": 4.8,
       "monthly": 47
@@ -67,7 +67,7 @@
     "9": {
       "id": 9,
       "name": "Ambasamudram-1",
-      "agm": "Johnson",
+      "agm": "John",
       "overall": 965,
       "star_rating": 4.9,
       "monthly": 63
@@ -75,10 +75,10 @@
     "10": {
       "id": 10,
       "name": "Anjugramam-1",
-      "agm": "Johnson",
+      "agm": "John",
       "overall": 731,
       "star_rating": 4.9,
-      "monthly": 18
+      "monthly": 19
     },
     "11": {
       "id": 11,
@@ -94,7 +94,7 @@
       "agm": "Jeeva",
       "overall": 1143,
       "star_rating": 4.7,
-      "monthly": 27
+      "monthly": 26
     },
     "13": {
       "id": 13,
@@ -102,15 +102,15 @@
       "agm": "Jeeva",
       "overall": 1154,
       "star_rating": 4.7,
-      "monthly": 37
+      "monthly": 35
     },
     "14": {
       "id": 14,
       "name": "Colachel-1",
       "agm": "Jeeva",
-      "overall": 300,
+      "overall": 301,
       "star_rating": 4.9,
-      "monthly": 21
+      "monthly": 22
     },
     "15": {
       "id": 15,
@@ -118,7 +118,7 @@
       "agm": "Jeeva",
       "overall": 441,
       "star_rating": 4.9,
-      "monthly": 18
+      "monthly": 17
     },
     "16": {
       "id": 16,
@@ -126,7 +126,7 @@
       "agm": "Jeeva",
       "overall": 388,
       "star_rating": 4.9,
-      "monthly": 42
+      "monthly": 41
     },
     "17": {
       "id": 17,
@@ -134,7 +134,7 @@
       "agm": "Jeeva",
       "overall": 789,
       "star_rating": 4.9,
-      "monthly": 46
+      "monthly": 45
     },
     "18": {
       "id": 18,
@@ -142,7 +142,7 @@
       "agm": "Seenivasan",
       "overall": 2570,
       "star_rating": 4.6,
-      "monthly": 120
+      "monthly": 118
     },
     "19": {
       "id": 19,
@@ -150,7 +150,7 @@
       "agm": "Seenivasan",
       "overall": 2473,
       "star_rating": 4.8,
-      "monthly": 111
+      "monthly": 117
     },
     "20": {
       "id": 20,
@@ -166,7 +166,7 @@
       "agm": "Seenivasan",
       "overall": 685,
       "star_rating": 4.9,
-      "monthly": 29
+      "monthly": 30
     },
     "22": {
       "id": 22,
@@ -174,7 +174,7 @@
       "agm": "Seenivasan",
       "overall": 650,
       "star_rating": 4.8,
-      "monthly": 39
+      "monthly": 36
     },
     "23": {
       "id": 23,
@@ -182,7 +182,7 @@
       "agm": "Seenivasan",
       "overall": 1002,
       "star_rating": 4.8,
-      "monthly": 36
+      "monthly": 31
     },
     "24": {
       "id": 24,
@@ -190,7 +190,7 @@
       "agm": "Seenivasan",
       "overall": 1048,
       "star_rating": 4.9,
-      "monthly": 35
+      "monthly": 36
     },
     "25": {
       "id": 25,
@@ -198,7 +198,7 @@
       "agm": "Seenivasan",
       "overall": 1025,
       "star_rating": 5.0,
-      "monthly": 61
+      "monthly": 62
     },
     "26": {
       "id": 26,
@@ -206,15 +206,15 @@
       "agm": "Muthuselvam",
       "overall": 6173,
       "star_rating": 4.9,
-      "monthly": 65
+      "monthly": 72
     },
     "27": {
       "id": 27,
-      "name": "Thenkasi-2",
+      "name": "Thenkasi",
       "agm": "Muthuselvam",
-      "overall": 4014,
-      "star_rating": 5.0,
-      "monthly": 135
+      "overall": 6180,
+      "star_rating": 4.9,
+      "monthly": 145
     },
     "28": {
       "id": 28,
@@ -222,7 +222,7 @@
       "agm": "Muthuselvam",
       "overall": 4016,
       "star_rating": 5.0,
-      "monthly": 41
+      "monthly": 43
     },
     "29": {
       "id": 29,
@@ -230,7 +230,7 @@
       "agm": "Muthuselvam",
       "overall": 2293,
       "star_rating": 4.9,
-      "monthly": 31
+      "monthly": 36
     },
     "30": {
       "id": 30,
@@ -238,7 +238,7 @@
       "agm": "Muthuselvam",
       "overall": 1048,
       "star_rating": 4.9,
-      "monthly": 36
+      "monthly": 31
     },
     "31": {
       "id": 31,
@@ -246,15 +246,15 @@
       "agm": "Muthuselvam",
       "overall": 740,
       "star_rating": 5.0,
-      "monthly": 71
+      "monthly": 73
     },
     "32": {
       "id": 32,
-      "name": "Virudhunagar",
-      "agm": "Venkadesan",
-      "overall": 2153,
+      "name": "Rajapalayam",
+      "agm": "Muthuselvam",
+      "overall": 2144,
       "star_rating": 4.8,
-      "monthly": 28
+      "monthly": 30
     },
     "33": {
       "id": 33,
@@ -262,7 +262,7 @@
       "agm": "Venkadesan",
       "overall": 2155,
       "star_rating": 4.8,
-      "monthly": 67
+      "monthly": 64
     },
     "34": {
       "id": 34,
@@ -278,7 +278,7 @@
       "agm": "Venkadesan",
       "overall": 2066,
       "star_rating": 4.8,
-      "monthly": 47
+      "monthly": 55
     },
     "36": {
       "id": 36,
@@ -286,7 +286,7 @@
       "agm": "Venkadesan",
       "overall": 1013,
       "star_rating": 5.0,
-      "monthly": 27
+      "monthly": -191
     },
     "37": {
       "id": 37,
@@ -294,7 +294,7 @@
       "agm": "Venkadesan",
       "overall": 1229,
       "star_rating": 4.8,
-      "monthly": 0
+      "monthly": 25
     }
   },
   "daily": {
