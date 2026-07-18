@@ -1439,5 +1439,27 @@
     "branch_id": 37,
     "branch_name": "Sivakasi",
     "agm": "Venkadesan"
+  },
+  {
+    "review_id": "Ci9DQUlRQUNvZENodHljRjlvT2tneGJEWlhia2g2YzBoQlJsTlRlbWxLV1RKcFZuYxAB",
+    "reviewer": "Anonymous",
+    "stars": 5,
+    "text": "Good experience and good approach for promoters",
+    "date_text": "a day ago",
+    "date": "2026-07-18",
+    "branch_id": 24,
+    "branch_name": "Sankarankovil-1",
+    "agm": "Seenivasan"
+  },
+  {
+    "review_id": "Ci9DQUlRQUNvZENodHljRjlvT2xkdVZYZ3lObll4ZERWeldDMXZZV0ZoTWt0allWRRAB",
+    "reviewer": "Anonymous",
+    "stars": 5,
+    "text": "Good mobile offers",
+    "date_text": "a day ago",
+    "date": "2026-07-18",
+    "branch_id": 24,
+    "branch_name": "Sankarankovil-1",
+    "agm": "Seenivasan"
   }
 ]
