@@ -1296,5 +1296,38 @@
     "branch_id": 4,
     "branch_name": "Thisayanvilai-1",
     "agm": "Sivaperumal"
+  },
+  {
+    "review_id": "Ci9DQUlRQUNvZENodHljRjlvT2s4MGRsQmlNRlIyV25CUE5tUnFXR1o0ZUZWUE5HYxAB",
+    "reviewer": "Anonymous",
+    "stars": 5,
+    "text": "Customer handling is good...Good looking display... The staff Sanjith is Helping mind ... Thank you",
+    "date_text": "3 days ago",
+    "date": "2026-07-19",
+    "branch_id": 16,
+    "branch_name": "Monday Market",
+    "agm": "Jeeva"
+  },
+  {
+    "review_id": "Ci9DQUlRQUNvZENodHljRjlvT2tKbFFreEpaVFZWVkcxNGJITlVORjltYlhONGNYYxAB",
+    "reviewer": "Anonymous",
+    "stars": 5,
+    "text": "Good product. Nice customer service",
+    "date_text": "3 days ago",
+    "date": "2026-07-19",
+    "branch_id": 16,
+    "branch_name": "Monday Market",
+    "agm": "Jeeva"
+  },
+  {
+    "review_id": "Ci9DQUlRQUNvZENodHljRjlvT2tVMFlsaFBXVWxJVXkxSE1sRkpUbk5qWjFOM2VFRRAB",
+    "reviewer": "Anonymous",
+    "stars": 5,
+    "text": "Good customer service. Good",
+    "date_text": "3 days ago",
+    "date": "2026-07-19",
+    "branch_id": 16,
+    "branch_name": "Monday Market",
+    "agm": "Jeeva"
   }
 ]

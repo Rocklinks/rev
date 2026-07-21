@@ -1472,5 +1472,27 @@
     "branch_id": 37,
     "branch_name": "Sivakasi",
     "agm": "Venkadesan"
+  },
+  {
+    "review_id": "Ci9DQUlRQUNvZENodHljRjlvT25KM2RXUmFiSGcwUXkxMGRWa3dXV3hyZUZjeVNuYxAB",
+    "reviewer": "Anonymous",
+    "stars": 5,
+    "text": "Good product.good customer service",
+    "date_text": "a day ago",
+    "date": "2026-07-21",
+    "branch_id": 16,
+    "branch_name": "Monday Market",
+    "agm": "Jeeva"
+  },
+  {
+    "review_id": "Ci9DQUlRQUNvZENodHljRjlvT21kdVZEbDNUREZNWDJjNWQxQkhOVEp6TXpOWFlYYxAB",
+    "reviewer": "Anonymous",
+    "stars": 5,
+    "text": "Today we plan to purchase an mobile, so just enquiring at this store mobile section kamini mam helps to find a perfect mobile fory usage, she given an clear data about mobile. Immediately commit my purchase then buy an mobile thanks kamini mam",
+    "date_text": "a day ago",
+    "date": "2026-07-21",
+    "branch_id": 33,
+    "branch_name": "Virudhunagar",
+    "agm": "Venkadesan"
   }
 ]
