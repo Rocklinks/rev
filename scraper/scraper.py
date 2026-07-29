@@ -183,8 +183,24 @@ async def extract_review_count(page):
                 r'([\d,]+)\s*reviews?\s*on Google',
                 r'aria-label="[^"]*([\d,]+)\s*review',
                 r'>([\d,]+)\s*reviews?<',
+                r'reviewCount["\s:]+(\d+)',
+                r'"reviewCount":\s*(\d+)',
+                r'(\d[\d,]+)\s*Google\s+review',
             ]:
                 m = re.search(pat, html, re.I)
+                if m:
+                    total = int(m.group(1).replace(",",""))
+                    if total > 0: break
+        except Exception: pass
+
+    # Strategy 4: meta tags / JSON-LD structured data
+    if not total:
+        try:
+            metas = page.locator('meta[content*="review"]')
+            mc = await metas.count()
+            for i in range(min(mc, 10)):
+                content = await get_attr(metas.nth(i), "content")
+                m = re.search(r"(\d[\d,]+)\s*review", content, re.I)
                 if m:
                     total = int(m.group(1).replace(",",""))
                     if total > 0: break
@@ -218,15 +234,20 @@ async def extract_stars(page):
     if not stars:
         try:
             html = await page.content()
-            m = re.search(r'"rating"[^}]*"([\d.]+)"', html)
-            if m:
-                v = float(m.group(1))
-                if 1.0 <= v <= 5.0: stars = v
-            if not stars:
-                m = re.search(r'aria-label="[^"]*([1-5]\.\d)\s*out\s*of', html, re.I)
+            for pat in [
+                r'"rating"[^}]*"([\d.]+)"',
+                r'"ratingValue"[:\s]*"?(?:[\"])?([1-5]\.?\d?)"?',
+                r'aria-label="[^"]*([1-5]\.\d)\s*out\s*of',
+                r'([1-5]\.\d)\s*out\s*of\s*5',
+                r'Rated\s+([1-5]\.\d)',
+                r'"averageRating"[:\s]*"?([1-5]\.?\d?)"?',
+            ]:
+                m = re.search(pat, html, re.I)
                 if m:
                     v = float(m.group(1))
-                    if 1.0 <= v <= 5.0: stars = v
+                    if 1.0 <= v <= 5.0:
+                        stars = v
+                        break
         except Exception: pass
 
     return stars
@@ -458,19 +479,19 @@ async def scrape_branch(browser, branch, today_str):
         # ── Phase 1: Get star rating & total reviews FIRST (with retries) ──
         total = 0
         stars = 0.0
-        for attempt in range(4):
+        for attempt in range(5):
             if not total:
                 total = await extract_review_count(page)
             if not stars:
                 stars = await extract_stars(page)
             if total and stars:
                 break
-            if not total or not stars:
+            if attempt < 4:
                 # Nudge page to re-render — click body then wait
                 try:
                     await page.locator("body").click(timeout=3000)
                 except Exception: pass
-                await page.wait_for_timeout(2000)
+                await page.wait_for_timeout(2500)
         result["total"] = total
         result["stars"] = stars
 
