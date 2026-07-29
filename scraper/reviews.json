@@ -4,7 +4,7 @@
       "id": 1,
       "name": "Tuticorin-1",
       "agm": "Sivaperumal",
-      "overall": 7399,
+      "overall": 7394,
       "star_rating": 4.9,
       "monthly": 435
     },
@@ -38,7 +38,7 @@
       "agm": "Sivaperumal",
       "overall": 1148,
       "star_rating": 4.9,
-      "monthly": 57
+      "monthly": 60
     },
     "6": {
       "id": 6,
@@ -46,13 +46,13 @@
       "agm": "Sivaperumal",
       "overall": 2071,
       "star_rating": 4.9,
-      "monthly": 54
+      "monthly": 56
     },
     "7": {
       "id": 7,
       "name": "Tirunelveli-1",
       "agm": "Johnson",
-      "overall": 4503,
+      "overall": 4496,
       "star_rating": 4.8,
       "monthly": 192
     },
@@ -84,7 +84,7 @@
       "id": 11,
       "name": "Nagercoil",
       "agm": "Jeeva",
-      "overall": 3229,
+      "overall": 3228,
       "star_rating": 4.8,
       "monthly": 143
     },
@@ -148,7 +148,7 @@
       "id": 19,
       "name": "Ramnad",
       "agm": "Seenivasan",
-      "overall": 2552,
+      "overall": 2551,
       "star_rating": 4.8,
       "monthly": 145
     },
@@ -254,7 +254,7 @@
       "agm": "Muthuselvam",
       "overall": 2121,
       "star_rating": 4.8,
-      "monthly": 109
+      "monthly": 112
     },
     "33": {
       "id": 33,
@@ -284,7 +284,7 @@
       "id": 36,
       "name": "Aruppukottai-2",
       "agm": "Venkadesan",
-      "overall": 1065,
+      "overall": 1061,
       "star_rating": 5.0,
       "monthly": 90
     },
@@ -17712,9 +17712,9 @@
     },
     "2026-07-28": {
       "1": {
-        "total_snap": 7399,
+        "total_snap": 7394,
         "daily_count": 0,
-        "raw_delta": 13,
+        "raw_delta": 8,
         "has_deletion": false,
         "monthly": 435,
         "star_rating": 4.9,
@@ -17749,26 +17749,26 @@
       },
       "5": {
         "total_snap": 1148,
-        "daily_count": 0,
+        "daily_count": 3,
         "raw_delta": 1,
         "has_deletion": false,
-        "monthly": 57,
+        "monthly": 60,
         "star_rating": 4.9,
-        "yesterday_reviews": 0
+        "yesterday_reviews": 10
       },
       "6": {
         "total_snap": 2071,
-        "daily_count": 0,
+        "daily_count": 2,
         "raw_delta": 1,
         "has_deletion": false,
-        "monthly": 54,
+        "monthly": 56,
         "star_rating": 4.9,
-        "yesterday_reviews": 0
+        "yesterday_reviews": 10
       },
       "7": {
-        "total_snap": 4503,
+        "total_snap": 4496,
         "daily_count": 0,
-        "raw_delta": -9,
+        "raw_delta": -16,
         "has_deletion": true,
         "monthly": 192,
         "star_rating": 4.8,
@@ -17802,9 +17802,9 @@
         "yesterday_reviews": 10
       },
       "11": {
-        "total_snap": 3229,
+        "total_snap": 3228,
         "daily_count": 0,
-        "raw_delta": 1,
+        "raw_delta": 0,
         "has_deletion": false,
         "monthly": 143,
         "star_rating": 4.8,
@@ -17874,9 +17874,9 @@
         "yesterday_reviews": 0
       },
       "19": {
-        "total_snap": 2552,
+        "total_snap": 2551,
         "daily_count": 0,
-        "raw_delta": 3,
+        "raw_delta": 2,
         "has_deletion": false,
         "monthly": 145,
         "star_rating": 4.8,
@@ -17992,12 +17992,12 @@
       },
       "32": {
         "total_snap": 2121,
-        "daily_count": 0,
+        "daily_count": 3,
         "raw_delta": -1,
         "has_deletion": true,
-        "monthly": 109,
+        "monthly": 112,
         "star_rating": 4.8,
-        "yesterday_reviews": 0
+        "yesterday_reviews": 10
       },
       "33": {
         "total_snap": 2173,
@@ -18027,9 +18027,9 @@
         "yesterday_reviews": 0
       },
       "36": {
-        "total_snap": 1065,
+        "total_snap": 1061,
         "daily_count": 0,
-        "raw_delta": -12,
+        "raw_delta": -16,
         "has_deletion": true,
         "monthly": 90,
         "star_rating": 5.0,
@@ -18047,6 +18047,21 @@
     }
   },
   "logs": [
+    {
+      "ran_at": "2026-07-29T01:46:18.535026+00:00",
+      "snap_date": "2026-07-28",
+      "baseline_date": "2026-07-27",
+      "success": 32,
+      "failed": 5,
+      "failed_names": [
+        "Sankarankovil-1",
+        "Ramnad-2",
+        "Surandai-1",
+        "Aruppukottai",
+        "Sivakasi"
+      ],
+      "total_reviews": 70
+    },
     {
       "ran_at": "2026-07-29T00:24:38.471708+00:00",
       "snap_date": "2026-07-28",
@@ -18469,15 +18484,7 @@
       "success": 36,
       "failed": 0,
       "failed_names": []
-    },
-    {
-      "ran_at": "2026-06-25T21:02:00.328139",
-      "snap_date": "2026-06-25",
-      "baseline_date": "2026-06-24",
-      "success": 36,
-      "failed": 0,
-      "failed_names": []
     }
   ],
-  "last_updated": "2026-07-29T00:24:38.471708+00:00"
+  "last_updated": "2026-07-29T01:46:18.535026+00:00"
 }
