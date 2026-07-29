@@ -455,19 +455,33 @@ async def scrape_branch(browser, branch, today_str):
         await page.goto(url, wait_until="load", timeout=30000)
         await page.wait_for_timeout(5000)
 
-        total = await extract_review_count(page)
+        # ── Phase 1: Get star rating & total reviews FIRST (with retries) ──
+        total = 0
+        stars = 0.0
+        for attempt in range(4):
+            if not total:
+                total = await extract_review_count(page)
+            if not stars:
+                stars = await extract_stars(page)
+            if total and stars:
+                break
+            if not total or not stars:
+                # Nudge page to re-render — click body then wait
+                try:
+                    await page.locator("body").click(timeout=3000)
+                except Exception: pass
+                await page.wait_for_timeout(2000)
         result["total"] = total
-
-        stars = await extract_stars(page)
         result["stars"] = stars
 
+        # ── Phase 2: Count today's reviews by scrolling ──
         today_count = 0
         if total > 0:
             today_count = await count_reviews_by_scroll(page, today_str)
         result["today_count"] = today_count
 
+        # ── Phase 3: Extract individual review cards ──
         if total > 0:
-            # Extract review cards (Reviews tab already opened and sorted by count_reviews_by_scroll)
             try:
                 panel_sel = '[tabindex="-1"]'
                 if await page.locator(panel_sel).count() > 0:
