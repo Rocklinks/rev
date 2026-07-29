@@ -461,6 +461,7 @@ async def scrape_branch(browser, branch, today_str):
         stars = await extract_stars(page)
         result["stars"] = stars
 
+        today_count = 0
         if total > 0:
             today_count = await count_reviews_by_scroll(page, today_str)
         result["today_count"] = today_count
@@ -521,7 +522,7 @@ async def run_all(today_str):
             nonlocal success
             async with sem:
                 bid = str(branch["id"])
-                print(f"  [{branch['id']:02}/36] {branch['name']} ...", flush=True)
+                print(f"  [{branch['id']:02}/{len(BRANCHES)}] {branch['name']} ...", flush=True)
                 res = await scrape_branch(browser, branch, today_str)
                 if res["total"] == 0:
                     await asyncio.sleep(3)
@@ -619,7 +620,7 @@ def save_results(results, success, failed, snap_date, run_time):
     data["logs"] = data["logs"][:50]
     data["last_updated"] = run_time
     save_data(data)
-    print(f"  Saved reviews.json — {success}/36 branches", flush=True)
+    print(f"  Saved reviews.json — {success}/{len(BRANCHES)} branches", flush=True)
 
 async def main():
     now_ist   = ist_now()
@@ -631,7 +632,7 @@ async def main():
     print(f"  Snap date: {snap_date}")
     print()
     results, success, failed = await run_all(today_str)
-    print(f"\n=== Results: {success}/36 ===")
+    print(f"\n=== Results: {success}/{len(BRANCHES)} ===")
     if failed: print(f"  Failed: {', '.join(failed)}")
     if success == 0:
         print("FATAL: 0 branches succeeded.")
