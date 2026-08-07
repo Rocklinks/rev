@@ -604,55 +604,17 @@ def save_results(results, success, failed, snap_date, run_time):
         }
         for rev in r["reviews"]:
             all_reviews.append({**rev,"branch_id":b["id"],"branch_name":b["name"],"agm":b["agm"]})
-    detail_dir = DATA_FILE.parent/"reviews_detail"
-    detail_dir.mkdir(parents=True, exist_ok=True)
 
-    # Group reviews by their actual parsed date and save each to correct file
-    by_date = {}
-    for rv in all_reviews:
-        d = rv.get("date", snap_date)
-        by_date.setdefault(d, []).append(rv)
-
-    for date_key, revs in by_date.items():
-        fpath = detail_dir/f"{date_key}.json"
-        existing = []
-        if fpath.exists():
-            try:
-                loaded = json.loads(fpath.read_text(encoding="utf-8"))
-                if isinstance(loaded, list):
-                    existing = [x for x in loaded if isinstance(x, dict)]
-            except Exception: pass
-        existing_ids = {rv["review_id"] for rv in existing if isinstance(rv, dict)}
-        merged = existing + [rv for rv in revs if rv["review_id"] not in existing_ids]
-        fpath.write_text(json.dumps(merged, indent=2, ensure_ascii=False), encoding="utf-8")
-        print(f"  Saved {len(merged)} reviews -> {fpath}", flush=True)
-
-    # Merge all existing review files into single all_reviews.json for fast frontend loading
-    all_reviews_file = detail_dir/"all_reviews.json"
-    all_existing = {}
-    if all_reviews_file.exists():
-        try:
-            loaded = json.loads(all_reviews_file.read_text(encoding="utf-8"))
-            if isinstance(loaded, list):
-                for rv in loaded:
-                    if isinstance(rv, dict) and "review_id" in rv:
-                        all_existing[rv["review_id"]] = rv
-            elif isinstance(loaded, dict):
-                all_existing = loaded
-        except Exception: pass
+    existing_reviews = {}
+    for rv in data.get("reviews", []):
+        if isinstance(rv, dict) and "review_id" in rv:
+            existing_reviews[rv["review_id"]] = rv
     for rv in all_reviews:
         if isinstance(rv, dict) and "review_id" in rv:
-            all_existing[rv["review_id"]] = rv
-    all_reviews_file.write_text(json.dumps(list(all_existing.values()), indent=2, ensure_ascii=False), encoding="utf-8")
-    print(f"  Saved all_reviews.json — {len(all_existing)} total reviews", flush=True)
+            existing_reviews[rv["review_id"]] = rv
+    data["reviews"] = list(existing_reviews.values())
+    print(f"  Reviews: {len(data['reviews'])} total", flush=True)
 
-    data.setdefault("logs",[]).insert(0,{
-        "ran_at":run_time,"snap_date":snap_date,
-        "baseline_date":baseline_date,"success":success,
-        "failed":len(failed),"failed_names":failed,
-        "total_reviews":sum(len(v) for v in by_date.values()),
-    })
-    data["logs"] = data["logs"][:50]
     data["last_updated"] = run_time
     save_data(data)
     print(f"  Saved reviews.json — {success}/{len(BRANCHES)} branches", flush=True)
